@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="GIU">
+  <rect width="64" height="64" rx="12" fill="#f6f6f6" />
+  <rect x="8" y="46" width="16" height="6" fill="#161616" />
+  <rect x="24" y="46" width="16" height="6" fill="#c20d0e" />
+  <rect x="40" y="46" width="16" height="6" fill="#d19428" />
+  <text
+    x="32"
+    y="38"
+    text-anchor="middle"
+    font-family="Poppins, Helvetica, Arial, sans-serif"
+    font-weight="700"
+    font-size="26"
+    letter-spacing="-1"
+  >
+    <tspan fill="#161616">G</tspan><tspan fill="#c20d0e">I</tspan><tspan fill="#d19428">U</tspan>
+  </text>
+</svg>

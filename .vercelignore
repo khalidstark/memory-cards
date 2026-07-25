@@ -1,0 +1,10 @@
+# The admin page and its server are local-only tools. They must never be
+# deployed: admin.html would otherwise be a public page, and anyone could read
+# the whole roster from it.
+admin.html
+assets/admin.css
+js/admin.js
+tools/
+node_modules/
+serve.json
+README.md

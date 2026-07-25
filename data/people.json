@@ -1,0 +1,38 @@
+{
+  "_readme": [
+    "Every QR code you hand out is one entry here. Nothing else can make a card.",
+    "The key is the slug and becomes the URL: 'besho' -> yoursite.com/besho",
+    "Use lowercase letters, numbers and dashes. Reserved: index, admin, assets, js, data, vendor, qr, api, card.",
+    "",
+    "TWO KINDS OF ENTRY — both carry a message you write:",
+    "",
+    "1) READY CARD — you know who it's for.",
+    "   \"besho\": {",
+    "     \"name\":  { \"en\": \"Besho\", \"ar\": \"بيشو\" },",
+    "     \"front\": { \"en\": \"...\", \"ar\": \"...\" },",
+    "     \"back\":  { \"en\": \"...\", \"ar\": \"...\" }",
+    "   }",
+    "",
+    "2) ASK CARD — the person types their own name when they scan.",
+    "   Put {{name}} anywhere in the message and it becomes what they typed.",
+    "   \"team\": {",
+    "     \"ask\": true,",
+    "     \"front\": { \"en\": \"{{name}} — ...\", \"ar\": \"{{name}} — ...\" },",
+    "     \"back\":  { \"en\": \"...\", \"ar\": \"...\" }",
+    "   }",
+    "",
+    "Easiest way to edit: npm run admin",
+    "Then: npm run deploy   (saving is not the same as publishing)"
+  ],
+  "new-group": {
+    "front": {
+      "en": "to {{name}} — i did not deal with u alot, but it was a pleasure, i truly hope we meet somwhere somehow for a reason in the future, byeeeee",
+      "ar": "{{name}} —"
+    },
+    "back": {
+      "en": "",
+      "ar": "What ever u build next, i know it will be good , keep up , and keep in touch"
+    },
+    "ask": true
+  }
+}

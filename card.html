@@ -1,0 +1,98 @@
+<!doctype html>
+<html lang="en" dir="ltr">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Your card — Connects AI Berlin</title>
+    <meta name="description" content="A personal card from the Connects AI Berlin workshop at GIU." />
+    <meta name="theme-color" content="#161616" />
+    <link rel="icon" href="/assets/favicon.svg" type="image/svg+xml" />
+    <link rel="stylesheet" href="/assets/style.css" />
+    <link rel="preload" as="image" href="/assets/card-front.png" />
+    <link rel="preload" as="image" href="/assets/card-back.png" />
+  </head>
+  <body>
+    <div class="flagbar"></div>
+
+    <div class="shell">
+      <header class="topbar">
+        <a class="wordmark" href="/">G<span>I</span><span>U</span> &nbsp;·&nbsp; Connects AI</a>
+        <button class="langbtn" id="lang" type="button" data-i18n="langName">العربية</button>
+      </header>
+
+      <main>
+        <!-- Ask step: only for slugs marked "ask" in people.json -------- -->
+        <section id="step-ask" class="hidden">
+          <p class="eyebrow" id="eyebrow-ask">Connects AI — Berlin Workshop</p>
+          <h1 data-i18n="askTitle"></h1>
+          <p class="lede" data-i18n="askBody"></p>
+
+          <form class="panel" id="form" novalidate>
+            <label class="field">
+              <span data-i18n="yourName"></span>
+              <input
+                id="name"
+                type="text"
+                autocomplete="name"
+                maxlength="32"
+                required
+                data-i18n-placeholder="namePlaceholder"
+              />
+            </label>
+
+            <p class="error" id="err-ask"></p>
+            <button class="btn btn-primary" type="submit" data-i18n="generate"></button>
+          </form>
+        </section>
+
+        <!-- The card itself --------------------------------------------- -->
+        <section id="found" class="hidden">
+          <p class="eyebrow" id="eyebrow">Connects AI — Berlin Workshop</p>
+          <h1 id="heading">&nbsp;</h1>
+          <p class="lede" data-i18n="tagline"></p>
+
+          <div class="cards">
+            <div class="cardframe" id="frame-front">
+              <span class="sidetag" data-i18n="front">Front</span>
+              <div class="skeleton"></div>
+            </div>
+            <div class="cardframe" id="frame-back">
+              <span class="sidetag" data-i18n="back">Back</span>
+              <div class="skeleton back"></div>
+            </div>
+          </div>
+
+          <div class="actions">
+            <button class="btn btn-primary" id="pdf" type="button" data-i18n="downloadPdf">Download PDF</button>
+            <button class="btn btn-accent" id="save" type="button" data-i18n="savePhoto">Save to Photos</button>
+            <button class="btn btn-ghost hidden" id="again" type="button" data-i18n="startOver"></button>
+          </div>
+          <p class="error" id="err"></p>
+        </section>
+
+        <!-- Unknown slug ------------------------------------------------ -->
+        <section id="missing" class="hidden">
+          <p class="eyebrow">404</p>
+          <h1 data-i18n="notFoundTitle"></h1>
+          <p class="lede" data-i18n="notFoundBody"></p>
+          <div class="actions">
+            <a class="btn btn-ghost" href="/" data-i18n="backHome"></a>
+          </div>
+        </section>
+      </main>
+
+      <footer>
+        <span id="footnote"></span>
+        <a class="linkedin" href="#" data-i18n-href="linkedinHref" target="_blank" rel="noopener">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+            <path d="M4.98 3.5a2.5 2.5 0 1 1 0 5 2.5 2.5 0 0 1 0-5ZM2.4 21.5h5.16V9.75H2.4V21.5Zm7.9-11.75h4.95v1.6h.07c.69-1.24 2.38-2.55 4.9-2.55 5.24 0 6.2 3.3 6.2 7.6v7.1h-5.16v-6.3c0-1.5-.03-3.44-2.14-3.44-2.14 0-2.47 1.63-2.47 3.33v6.4H10.3V9.75Z" />
+          </svg>
+          <span data-i18n="linkedin"></span>
+        </a>
+      </footer>
+    </div>
+
+    <script src="/vendor/jspdf.umd.min.js"></script>
+    <script type="module" src="/js/card.js"></script>
+  </body>
+</html>

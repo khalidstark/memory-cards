@@ -1,0 +1,10 @@
+node_modules/
+
+# Contains the Vercel project id — local link, not source.
+.vercel/
+
+# Generated from data/people.json. Regenerate with `npm run qr <live-url>`
+# after deploying, so codes never point at a stale URL.
+qr/
+
+.DS_Store

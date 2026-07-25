@@ -1,0 +1,122 @@
+<!doctype html>
+<html lang="en" dir="ltr">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Card admin — Connects AI Berlin</title>
+    <meta name="robots" content="noindex, nofollow" />
+    <link rel="icon" href="/assets/favicon.svg" type="image/svg+xml" />
+    <link rel="stylesheet" href="/assets/style.css" />
+    <link rel="stylesheet" href="/assets/admin.css" />
+  </head>
+  <body class="admin">
+    <div class="flagbar"></div>
+
+    <header class="adminbar">
+      <div class="adminbar-left">
+        <span class="wordmark">G<span>I</span><span>U</span></span>
+        <strong>Card admin</strong>
+        <span class="pill" id="status">connecting…</span>
+      </div>
+      <div class="adminbar-right">
+        <label class="baseurl">
+          <span>Live site URL</span>
+          <input id="base" type="url" placeholder="https://your-site.vercel.app" />
+        </label>
+        <button class="btn btn-primary" id="save" type="button">Save all</button>
+      </div>
+    </header>
+
+    <div class="adminwrap">
+      <!-- Roster ------------------------------------------------------- -->
+      <aside class="roster">
+        <div class="roster-actions">
+          <button class="btn btn-ghost" id="add-ready" type="button">+ Ready card</button>
+          <button class="btn btn-ghost" id="add-ask" type="button">+ Ask card</button>
+        </div>
+        <ul id="list"></ul>
+        <p class="hint" id="count"></p>
+      </aside>
+
+      <!-- Editor ------------------------------------------------------- -->
+      <main class="editor">
+        <p class="empty" id="empty">Pick someone on the left, or add a new card.</p>
+
+        <form id="editor" class="hidden" autocomplete="off">
+          <div class="row">
+            <label class="field grow">
+              <span>Link / slug</span>
+              <input id="slug" type="text" spellcheck="false" />
+              <small class="hint" id="urlpreview"></small>
+            </label>
+            <div class="field">
+              <span>Type</span>
+              <div class="seg" role="group">
+                <button type="button" data-type="ready" class="segbtn">Ready</button>
+                <button type="button" data-type="ask" class="segbtn">Asks name</button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Only ready cards carry a name; ask cards get it from the visitor. -->
+          <div id="name-fields">
+            <div class="row">
+              <label class="field grow">
+                <span>Name (English)</span>
+                <input id="name-en" type="text" />
+              </label>
+              <label class="field grow">
+                <span>Name (Arabic)</span>
+                <input id="name-ar" type="text" dir="rtl" />
+              </label>
+            </div>
+          </div>
+
+          <p class="hint namehint hidden" id="askhint">
+            This card asks the person for their name when they scan it. Write
+            <code>{{name}}</code> anywhere in the message and it’s replaced with what they type.
+          </p>
+
+          <div id="message-fields">
+            <label class="field">
+              <span>Front message (English)</span>
+              <textarea id="front-en" rows="3"></textarea>
+            </label>
+            <label class="field">
+              <span>Front message (Arabic)</span>
+              <textarea id="front-ar" rows="3" dir="rtl"></textarea>
+            </label>
+            <label class="field">
+              <span>Back message (English)</span>
+              <textarea id="back-en" rows="2"></textarea>
+            </label>
+            <label class="field">
+              <span>Back message (Arabic)</span>
+              <textarea id="back-ar" rows="2" dir="rtl"></textarea>
+            </label>
+          </div>
+
+          <!-- Live preview -->
+          <div class="previewhead">
+            <span class="eyebrow">Live preview</span>
+            <button class="langbtn" id="prevlang" type="button">العربية</button>
+          </div>
+          <div class="cards" id="preview">
+            <div class="cardframe"><div class="skeleton"></div></div>
+            <div class="cardframe"><div class="skeleton back"></div></div>
+          </div>
+
+          <div class="actions">
+            <button class="btn btn-accent" id="qr" type="button">Download QR code</button>
+            <button class="btn btn-ghost" id="open" type="button">Open card page</button>
+            <button class="btn btn-ghost danger" id="delete" type="button">Delete</button>
+          </div>
+        </form>
+      </main>
+    </div>
+
+    <p class="toast hidden" id="toast"></p>
+
+    <script type="module" src="/js/admin.js"></script>
+  </body>
+</html>

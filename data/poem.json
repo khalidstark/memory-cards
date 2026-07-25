@@ -1,0 +1,18 @@
+{
+  "_readme": [
+    "The Arabic poetry shown on the landing page.",
+    "Each entry in 'verses' is one بيت: [صدر, عجز]. They render side by side on a",
+    "wide screen and stack on a phone, the way Arabic verse is normally set.",
+    "'author' is optional — leave it empty to hide the credit.",
+    "To hide the whole section, set \"verses\": []"
+  ],
+
+  "verses": [
+    ["تَغَرَّبْ عَنِ الأوطانِ في طَلَبِ العُلا", "وسافِرْ فَفي الأسفارِ خَمسُ فَوائِدِ"],
+    ["تَفَرُّجُ هَمٍّ واكتِسابُ مَعيشَةٍ", "وعِلْمٌ وآدابٌ وصُحبَةُ ماجِدِ"],
+    ["فإنْ قيلَ في الأسفارِ ذُلٌّ ومِحنَةٌ", "وقَطعُ الفَيافي وارتِكابُ الشَدائِدِ"],
+    ["فمَوتُ الفَتى خَيرٌ لهُ مِن حَياتِهِ", "بِدارِ هَوانٍ بَينَ واشٍ وحاسِدِ"]
+  ],
+
+  "author": "الإمام الشافعي"
+}

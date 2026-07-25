@@ -1,0 +1,56 @@
+<!doctype html>
+<html lang="en" dir="ltr">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Connects AI — Berlin Workshop · GIU</title>
+    <meta name="description" content="A small thank-you from the Connects AI Berlin workshop at German International University." />
+    <meta name="theme-color" content="#161616" />
+    <link rel="icon" href="/assets/favicon.svg" type="image/svg+xml" />
+    <link rel="stylesheet" href="/assets/style.css" />
+    <link rel="preload" as="image" href="/assets/card-front.png" />
+  </head>
+  <body>
+    <div class="flagbar"></div>
+
+    <div class="shell">
+      <header class="topbar">
+        <a class="wordmark" href="/">G<span>I</span><span>U</span> &nbsp;·&nbsp; Connects AI</a>
+        <button class="langbtn" id="lang" type="button" data-i18n="langName">العربية</button>
+      </header>
+
+      <main>
+        <p class="eyebrow" id="eyebrow">Berlin · 2026</p>
+        <!-- Always English: it's the name on the card artwork, not a phrase. -->
+        <h1>Connects AI — Berlin Workshop</h1>
+        <p class="lede" data-i18n="intro"></p>
+
+        <!-- The poem. Text lives in data/poem.json so it's easy to change. -->
+        <section class="poem hidden" id="poem" dir="rtl" lang="ar">
+          <blockquote id="poem-lines"></blockquote>
+          <cite id="poem-author"></cite>
+        </section>
+
+        <p class="eyebrow" data-i18n="sampleLabel"></p>
+        <div class="cards">
+          <div class="cardframe" id="preview">
+            <div class="skeleton"></div>
+          </div>
+        </div>
+        <p class="lede" data-i18n="sampleNote"></p>
+      </main>
+
+      <footer>
+        <span id="footnote"></span>
+        <a class="linkedin" href="#" data-i18n-href="linkedinHref" target="_blank" rel="noopener">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+            <path d="M4.98 3.5a2.5 2.5 0 1 1 0 5 2.5 2.5 0 0 1 0-5ZM2.4 21.5h5.16V9.75H2.4V21.5Zm7.9-11.75h4.95v1.6h.07c.69-1.24 2.38-2.55 4.9-2.55 5.24 0 6.2 3.3 6.2 7.6v7.1h-5.16v-6.3c0-1.5-.03-3.44-2.14-3.44-2.14 0-2.47 1.63-2.47 3.33v6.4H10.3V9.75Z" />
+          </svg>
+          <span data-i18n="linkedin"></span>
+        </a>
+      </footer>
+    </div>
+
+    <script type="module" src="/js/home.js"></script>
+  </body>
+</html>

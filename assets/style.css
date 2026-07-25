@@ -1,0 +1,432 @@
+/* ---------------------------------------------------------------------------
+   Palette sampled directly from the card artwork so the page and the card
+   read as one object.
+   --------------------------------------------------------------------------- */
+:root {
+  --ink: #161616;
+  --ink-soft: #4a4a4a;
+  --red: #c20d0e;
+  --gold: #d19428;
+  --beige: #f2e8df;
+  --paper: #f6f6f6;
+  --white: #fff;
+  --line: rgba(22, 22, 22, 0.12);
+  --radius: 14px;
+  --shadow: 0 1px 2px rgba(22, 22, 22, 0.06), 0 12px 32px rgba(22, 22, 22, 0.09);
+  --font-en: Poppins, system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --font-ar: Cairo, system-ui, -apple-system, sans-serif;
+}
+
+@font-face {
+  font-family: 'Poppins';
+  font-style: normal;
+  font-weight: 600;
+  font-display: block;
+  src: url('fonts/Poppins-600-latin.woff2') format('woff2');
+}
+@font-face {
+  font-family: 'Poppins';
+  font-style: normal;
+  font-weight: 700;
+  font-display: block;
+  src: url('fonts/Poppins-700-latin.woff2') format('woff2');
+}
+@font-face {
+  font-family: 'Cairo';
+  font-style: normal;
+  font-weight: 400 800;
+  font-display: block;
+  src: url('fonts/Cairo-600-arabic.woff2') format('woff2');
+  unicode-range: U+0600-06FF, U+0750-077F, U+0870-088E, U+FB50-FDFF, U+FE70-FEFF;
+}
+@font-face {
+  font-family: 'Cairo';
+  font-style: normal;
+  font-weight: 400 800;
+  font-display: block;
+  src: url('fonts/Cairo-600-latin.woff2') format('woff2');
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
+  margin: 0;
+  min-height: 100dvh;
+  font-family: var(--font-en);
+  font-weight: 600;
+  color: var(--ink);
+  background: var(--paper);
+  line-height: 1.55;
+  display: flex;
+  flex-direction: column;
+}
+
+:root[dir='rtl'] body {
+  font-family: var(--font-ar);
+}
+
+/* The tricolour rule that runs along the top of both cards. */
+.flagbar {
+  height: 6px;
+  flex: none;
+  background: linear-gradient(
+    to right,
+    var(--ink) 0 33.33%,
+    var(--red) 33.33% 66.66%,
+    var(--gold) 66.66% 100%
+  );
+}
+
+.shell {
+  width: min(100% - 2rem, 940px);
+  margin-inline: auto;
+  padding-block: 1.25rem 3rem;
+  flex: 1;
+}
+
+/* --- header ---------------------------------------------------------- */
+.topbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding-block: 0.5rem 1.5rem;
+}
+
+.wordmark {
+  font-weight: 700;
+  font-size: 0.95rem;
+  letter-spacing: 0.02em;
+  text-decoration: none;
+  color: var(--ink);
+}
+.wordmark span {
+  color: var(--red);
+}
+.wordmark span + span {
+  color: var(--gold);
+}
+
+.langbtn {
+  font: inherit;
+  font-size: 0.85rem;
+  font-weight: 700;
+  padding: 0.4rem 0.9rem;
+  border: 1.5px solid var(--ink);
+  border-radius: 999px;
+  background: transparent;
+  color: var(--ink);
+  cursor: pointer;
+  transition: background 0.15s ease, color 0.15s ease;
+}
+.langbtn:hover {
+  background: var(--ink);
+  color: var(--paper);
+}
+
+/* --- type ------------------------------------------------------------ */
+h1 {
+  font-size: clamp(1.6rem, 5vw, 2.4rem);
+  font-weight: 700;
+  line-height: 1.15;
+  margin: 0 0 0.6rem;
+  letter-spacing: -0.015em;
+}
+
+.lede {
+  font-weight: 600;
+  color: var(--ink-soft);
+  margin: 0 0 1.6rem;
+  max-width: 46ch;
+}
+
+.eyebrow {
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--gold);
+  margin: 0 0 0.5rem;
+}
+
+/* --- cards ----------------------------------------------------------- */
+.cards {
+  display: grid;
+  gap: 1.25rem;
+  margin-bottom: 1.75rem;
+}
+
+.cardframe {
+  background: var(--white);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  overflow: hidden;
+  position: relative;
+}
+
+.cardframe canvas {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+.cardframe .sidetag {
+  position: absolute;
+  inset-block-start: 0.6rem;
+  inset-inline-start: 0.7rem;
+  font-size: 0.62rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--ink-soft);
+  background: rgba(255, 255, 255, 0.82);
+  backdrop-filter: blur(4px);
+  padding: 0.15rem 0.5rem;
+  border-radius: 999px;
+}
+
+.skeleton {
+  aspect-ratio: 1336 / 553;
+  background: linear-gradient(100deg, var(--beige) 30%, #f9f4ef 50%, var(--beige) 70%) 0 0 / 220% 100%;
+  animation: sweep 1.4s linear infinite;
+}
+.skeleton.back {
+  aspect-ratio: 1336 / 517;
+}
+@keyframes sweep {
+  to {
+    background-position: -220% 0;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .skeleton {
+    animation: none;
+  }
+}
+
+/* --- buttons --------------------------------------------------------- */
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.7rem;
+}
+
+.btn {
+  font: inherit;
+  font-weight: 700;
+  font-size: 0.95rem;
+  padding: 0.8rem 1.4rem;
+  border-radius: 999px;
+  border: 1.5px solid transparent;
+  cursor: pointer;
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  transition: transform 0.12s ease, opacity 0.15s ease, background 0.15s ease;
+  flex: 1 1 auto;
+  justify-content: center;
+  min-height: 48px; /* comfortable tap target on a phone */
+}
+.btn:active {
+  transform: translateY(1px);
+}
+.btn:disabled {
+  opacity: 0.6;
+  cursor: progress;
+}
+
+.btn-primary {
+  background: var(--ink);
+  color: var(--paper);
+}
+.btn-primary:hover:not(:disabled) {
+  background: #000;
+}
+
+.btn-accent {
+  background: var(--red);
+  color: #fff;
+}
+.btn-accent:hover:not(:disabled) {
+  background: #a80b0c;
+}
+
+.btn-ghost {
+  background: transparent;
+  color: var(--ink);
+  border-color: var(--line);
+}
+.btn-ghost:hover:not(:disabled) {
+  border-color: var(--ink);
+}
+
+/* --- form ------------------------------------------------------------ */
+.field {
+  display: block;
+  margin-bottom: 1.1rem;
+}
+.field > span {
+  display: block;
+  font-size: 0.8rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--ink-soft);
+  margin-bottom: 0.35rem;
+}
+.field input,
+.field select {
+  font: inherit;
+  font-weight: 600;
+  width: 100%;
+  padding: 0.8rem 1rem;
+  min-height: 48px;
+  border: 1.5px solid var(--line);
+  border-radius: 10px;
+  background: var(--white);
+  color: var(--ink);
+}
+.field input:focus,
+.field select:focus {
+  outline: 2px solid var(--gold);
+  outline-offset: 1px;
+  border-color: transparent;
+}
+
+.error {
+  color: var(--red);
+  font-size: 0.88rem;
+  margin: 0 0 1rem;
+  min-height: 1.2em;
+}
+
+/* --- poem ------------------------------------------------------------ */
+.poem {
+  position: relative;
+  margin: 0 0 2rem;
+  padding: 1.5rem 1.75rem;
+  background: var(--beige);
+  border-radius: var(--radius);
+  font-family: var(--font-ar);
+  overflow: hidden;
+}
+.poem::before {
+  content: '';
+  position: absolute;
+  inset-block: 0;
+  inset-inline-start: 0;
+  width: 5px;
+  background: linear-gradient(to bottom, var(--ink) 0 33.33%, var(--red) 33.33% 66.66%, var(--gold) 66.66% 100%);
+}
+.poem blockquote {
+  margin: 0;
+}
+/* One بيت: صدر and عجز side by side, stacking on a narrow screen. */
+.poem .bayt {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 0.1rem 2rem;
+  margin: 0 0 0.7rem;
+  font-size: clamp(1rem, 2.5vw, 1.25rem);
+  font-weight: 600;
+  line-height: 2;
+  color: var(--ink);
+}
+.poem .bayt:last-child {
+  margin-bottom: 0;
+}
+.poem .bayt span:last-child {
+  color: var(--ink-soft);
+}
+
+@media (min-width: 700px) {
+  .poem .bayt {
+    grid-template-columns: 1fr 1fr;
+  }
+  /* Both hemistichs read toward the centre gutter, as in printed verse. */
+  .poem .bayt span:first-child {
+    text-align: start;
+  }
+  .poem .bayt span:last-child {
+    text-align: start;
+    color: var(--ink);
+  }
+}
+.poem cite {
+  display: block;
+  margin-top: 0.9rem;
+  font-style: normal;
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: var(--gold);
+}
+.poem cite:empty {
+  display: none;
+}
+
+.panel {
+  background: var(--white);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  padding: 1.5rem;
+  margin-bottom: 1.75rem;
+}
+
+/* --- footer ---------------------------------------------------------- */
+footer {
+  border-top: 1px solid var(--line);
+  padding-block: 1.4rem;
+  margin-top: 2rem;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.8rem 1.4rem;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 0.85rem;
+  color: var(--ink-soft);
+}
+
+.linkedin {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-weight: 700;
+  color: var(--ink);
+  text-decoration: none;
+  border-bottom: 2px solid var(--gold);
+  padding-bottom: 1px;
+}
+.linkedin:hover {
+  color: var(--red);
+  border-color: var(--red);
+}
+.linkedin svg {
+  flex: none;
+}
+
+.hidden {
+  display: none !important;
+}
+
+:focus-visible {
+  outline: 2px solid var(--gold);
+  outline-offset: 2px;
+}
+
+@media (min-width: 760px) {
+  .shell {
+    padding-block: 2rem 4rem;
+  }
+  .actions .btn {
+    flex: 0 1 auto;
+  }
+}

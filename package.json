@@ -1,0 +1,14 @@
+{
+  "name": "giu-farewell",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "admin": "node tools/admin-server.mjs",
+    "deploy": "npx --yes vercel --prod --yes",
+    "qr": "node tools/make-qrs.mjs",
+    "dev": "npx --yes serve -l 4173 ."
+  },
+  "dependencies": {
+    "qrcode": "^1.5.4"
+  }
+}
