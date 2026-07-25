@@ -236,3 +236,34 @@ every slug returned "page not found" until the destination was changed to the
 clean path. The local `serve.json` doesn't behave this way, so this only shows
 up on the deployed site: **always open a real slug like `/besho` on the live URL
 after deploying, not just the homepage.**
+
+---
+
+## Going back to a known-good version
+
+This project is a git repo. The first commit is tagged `v1-working` — the state
+where routing, exports, the admin and all its guards were verified working.
+
+```bash
+git status                  # what have I changed?
+git diff                    # show me the changes
+git checkout -- <file>      # undo changes to one file
+git reset --hard v1-working # throw away everything since the tag
+```
+
+Before trying something risky, make a branch so the working version stays put:
+
+```bash
+git checkout -b my-experiment
+# ...try things...
+git checkout main           # back to safety, experiment still on its branch
+```
+
+Commit whenever something works:
+
+```bash
+git add -A && git commit -m "what changed"
+```
+
+Note `data/people.json` **is** tracked, so a reset also rewinds your cards.
+If you only want to rewind code, keep a copy of that file first.
