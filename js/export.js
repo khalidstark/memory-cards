@@ -5,7 +5,7 @@
 // Arabic in the PDF is the same shaped, correct text you see on screen, rather
 // than jsPDF's own (poor) Arabic handling.
 // ---------------------------------------------------------------------------
-import { CARD_ART, EXPORT_SCALE } from './config.js';
+import { CARD_ART, DEFAULT_TEMPLATE, EXPORT_SCALE } from './config.js';
 import { renderCard } from './card-render.js';
 
 /** iPadOS reports as Mac, hence the touch check. */
@@ -50,9 +50,10 @@ function slugify(name) {
  */
 async function renderBothSides(card, scale = EXPORT_SCALE) {
   const { lang } = card;
+  const template = card.template || DEFAULT_TEMPLATE;
   return Promise.all([
-    renderCard({ side: 'front', text: card.front, name: '', lang, scale }),
-    renderCard({ side: 'back', text: card.back, name: card.name, lang, scale }),
+    renderCard({ side: 'front', text: card.front, name: '', lang, scale, template }),
+    renderCard({ side: 'back', text: card.back, name: card.name, lang, scale, template }),
   ]);
 }
 
@@ -66,7 +67,8 @@ export async function downloadPdf(card) {
   const [front, back] = await renderBothSides(card);
 
   const PAGE_WIDTH_MM = 150;
-  const sizeFor = (side) => [PAGE_WIDTH_MM, (PAGE_WIDTH_MM * CARD_ART[side].height) / CARD_ART[side].width];
+  const art = CARD_ART[card.template || DEFAULT_TEMPLATE];
+  const sizeFor = (side) => [PAGE_WIDTH_MM, (PAGE_WIDTH_MM * art[side].height) / art[side].width];
 
   const frontSize = sizeFor('front');
   const doc = new jsPDF({ orientation: 'landscape', unit: 'mm', format: frontSize, compress: true });

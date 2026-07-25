@@ -68,6 +68,82 @@
             <button class="btn btn-ghost hidden" id="again" type="button" data-i18n="startOver"></button>
           </div>
           <p class="error" id="err"></p>
+
+          <!-- Only for cards where Khalid enabled replies. -->
+          <div class="replyinvite hidden" id="reply-invite">
+            <p data-i18n="replyInvite"></p>
+            <button class="btn btn-accent" id="open-reply" type="button" data-i18n="replyCta"></button>
+          </div>
+        </section>
+
+        <!-- Reply: write a card back ------------------------------------ -->
+        <section id="step-reply" class="hidden">
+          <p class="eyebrow" data-i18n="replyEyebrow"></p>
+          <h1 data-i18n="replyTitle"></h1>
+          <p class="lede" data-i18n="replyBody"></p>
+
+          <form class="panel" id="reply-form" novalidate>
+            <label class="field">
+              <span data-i18n="yourName"></span>
+              <input
+                id="reply-name"
+                type="text"
+                autocomplete="name"
+                maxlength="40"
+                required
+                data-i18n-placeholder="namePlaceholder"
+              />
+            </label>
+
+            <label class="field">
+              <span data-i18n="replyMessage"></span>
+              <textarea id="reply-message" rows="4" maxlength="500" required></textarea>
+              <small class="hint"><span id="reply-count">0</span>/500</small>
+            </label>
+
+            <!-- Honeypot: hidden from people, irresistible to bots. -->
+            <div class="hp" aria-hidden="true">
+              <label>Website<input id="reply-hp" type="text" tabindex="-1" autocomplete="off" /></label>
+            </div>
+
+            <p class="error" id="reply-err"></p>
+            <div class="actions">
+              <button class="btn btn-primary" id="reply-send" type="submit" data-i18n="replySend"></button>
+              <button class="btn btn-ghost" id="reply-cancel" type="button" data-i18n="replyCancel"></button>
+            </div>
+          </form>
+
+          <p class="eyebrow" data-i18n="replyPreview"></p>
+          <div class="cards">
+            <div class="cardframe" id="reply-frame-front">
+              <span class="sidetag" data-i18n="front">Front</span>
+              <div class="skeleton"></div>
+            </div>
+          </div>
+        </section>
+
+        <!-- Reply sent -------------------------------------------------- -->
+        <section id="step-thanks" class="hidden">
+          <p class="eyebrow" data-i18n="replyEyebrow"></p>
+          <h1 data-i18n="thanksTitle"></h1>
+          <p class="lede" data-i18n="thanksBody"></p>
+
+          <div class="cards">
+            <div class="cardframe" id="thanks-frame-front">
+              <span class="sidetag" data-i18n="front">Front</span>
+              <div class="skeleton"></div>
+            </div>
+            <div class="cardframe" id="thanks-frame-back">
+              <span class="sidetag" data-i18n="back">Back</span>
+              <div class="skeleton"></div>
+            </div>
+          </div>
+
+          <div class="actions">
+            <button class="btn btn-primary" id="reply-pdf" type="button" data-i18n="replyDownload"></button>
+            <button class="btn btn-ghost" id="back-to-card" type="button" data-i18n="backToCard"></button>
+          </div>
+          <p class="error" id="thanks-err"></p>
         </section>
 
         <!-- Unknown slug ------------------------------------------------ -->

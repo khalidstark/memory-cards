@@ -303,3 +303,91 @@ body.admin {
   background: #fdf0d9;
   color: #8a5a08;
 }
+
+/* Per-card switch: does this person get to reply with a card of their own? */
+.toggle {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.7rem;
+  padding: 0.85rem 1rem;
+  margin-bottom: 1.1rem;
+  border: 1.5px solid var(--line);
+  border-radius: 10px;
+  cursor: pointer;
+}
+.toggle input {
+  width: 20px;
+  height: 20px;
+  margin-top: 0.15rem;
+  accent-color: var(--red);
+  flex: none;
+}
+.toggle strong {
+  display: block;
+  font-size: 0.92rem;
+}
+.toggle small {
+  display: block;
+  margin-top: 0.15rem;
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: var(--ink-soft);
+  line-height: 1.5;
+}
+.toggle small code {
+  background: var(--paper);
+  padding: 0.05rem 0.3rem;
+  border-radius: 4px;
+}
+.toggle:has(input:checked) {
+  border-color: var(--red);
+  background: #fdf6f6;
+}
+
+.roster li .tag.reply {
+  background: #e8f0fb;
+  color: #1b4f8a;
+}
+
+/* --- replies people sent back ---------------------------------------- */
+.replyitem {
+  margin-bottom: 1.75rem;
+  padding-bottom: 1.5rem;
+  border-bottom: 1px solid var(--line);
+}
+.replyitem:last-child {
+  border-bottom: 0;
+}
+.replyitem header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0.25rem 0.75rem;
+  margin-bottom: 0.7rem;
+}
+.replyitem header strong {
+  font-size: 1.05rem;
+}
+.replyitem header small {
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: var(--ink-soft);
+}
+.replyitem .cardframe {
+  margin-bottom: 0.8rem;
+}
+.replyitem .btn {
+  flex: 0 1 auto;
+}
+#reply-badge {
+  font-variant-numeric: tabular-nums;
+  color: var(--red);
+}
+
+/* Buttons in a header row shouldn't stretch the way action-row buttons do. */
+.previewhead .btn {
+  flex: 0 0 auto;
+  padding: 0.5rem 1rem;
+  min-height: 40px;
+  font-size: 0.85rem;
+}

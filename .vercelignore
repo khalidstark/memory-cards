@@ -8,3 +8,8 @@ tools/
 node_modules/
 serve.json
 README.md
+
+# Replies people send back. These are personal messages addressed to Khalid —
+# deploying this folder would make every one of them readable by anyone at
+# /replies/<file>.json. They live in the git repo and on his laptop, never here.
+replies/

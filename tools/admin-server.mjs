@@ -84,6 +84,7 @@ function validate(people) {
     // render blank after the person types their name.
     if (!entry.front || !entry.back) return `"${slug}" needs front and back text`;
     if (entry.workshops) return `"${slug}" uses the old "workshops" format — reload the admin page (⌘R)`;
+    if ('reply' in entry && typeof entry.reply !== 'boolean') return `"${slug}" has a bad reply flag`;
   }
   return null;
 }
@@ -94,7 +95,7 @@ function validate(people) {
  * JavaScript from before a change, and saving would write the old format over
  * good data. That happened once — hence this check.
  */
-const SCHEMA = 2;
+const SCHEMA = 3;
 
 async function handleApi(req, res, url) {
   if (url.pathname === '/api/health') return json(res, 200, { ok: true, schema: SCHEMA });
@@ -147,6 +148,27 @@ async function handleApi(req, res, url) {
     const count = Object.keys(incoming).filter((k) => !k.startsWith('_')).length;
     console.log(`saved data/people.json — ${count} ${count === 1 ? 'card' : 'cards'}`);
     return json(res, 200, { ok: true, count });
+  }
+
+  // Replies people sent back, as pulled into the repo by `git pull`.
+  // Read-only, and local-only — this server never runs anywhere but the laptop.
+  if (url.pathname === '/api/replies' && req.method === 'GET') {
+    const dir = join(ROOT, 'replies');
+    if (!existsSync(dir)) return json(res, 200, { replies: [] });
+    const { readdir } = await import('node:fs/promises');
+    const names = (await readdir(dir)).filter((n) => n.endsWith('.json') && !n.startsWith('.'));
+    const replies = [];
+    for (const name of names) {
+      try {
+        const data = JSON.parse(await readFile(join(dir, name), 'utf8'));
+        if (data && data.message) replies.push({ file: name, ...data });
+      } catch {
+        // A malformed file shouldn't hide every other reply.
+        console.warn(`skipped unreadable reply: ${name}`);
+      }
+    }
+    replies.sort((a, b) => String(b.receivedAt).localeCompare(String(a.receivedAt)));
+    return json(res, 200, { replies });
   }
 
   if (url.pathname === '/api/qr' && req.method === 'GET') {

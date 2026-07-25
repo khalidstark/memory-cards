@@ -5,7 +5,7 @@
 // shapes Arabic correctly, the same pixels end up in the PNG and the PDF, and
 // there is no html2canvas font-loading race to lose.
 // ---------------------------------------------------------------------------
-import { CARD_ART, CARD_LAYOUT, TYPE } from './config.js';
+import { ARTWORK_ONLY, CARD_ART, CARD_LAYOUT, DEFAULT_TEMPLATE, TYPE } from './config.js';
 
 const imageCache = new Map();
 
@@ -92,6 +92,14 @@ function wrap(ctx, text, maxWidth) {
  * Shrink the font until the wrapped text fits the box in both axes.
  * Returns the chosen size and the lines at that size.
  */
+/**
+ * Type sizes in TYPE are tuned against a 1336px-wide card. Artwork supplied at
+ * a higher resolution has more pixels for the same physical card, so a fixed
+ * pixel size would render proportionally smaller. Everything is measured in
+ * multiples of this instead.
+ */
+const REFERENCE_WIDTH = 1336;
+
 function fitText(ctx, text, box, style, scale) {
   const maxSize = TYPE.maxSize * scale;
   const minSize = TYPE.minSize * scale;
@@ -107,9 +115,9 @@ function fitText(ctx, text, box, style, scale) {
   return best; // may slightly overflow only if the message is extremely long
 }
 
-function resolveBox(side, scale) {
-  const art = CARD_ART[side];
-  const l = CARD_LAYOUT[side];
+function resolveBox(template, side, scale) {
+  const art = CARD_ART[template][side];
+  const l = CARD_LAYOUT[template][side];
   const w = art.width * scale;
   const h = art.height * scale;
   return {
@@ -129,11 +137,20 @@ function resolveBox(side, scale) {
  * @param {'en'|'ar'} lang
  * @param {number} scale    1 for preview, EXPORT_SCALE for download
  * @param {boolean} debug   draw the safe-zone box
+ * @param {'giu'|'reply'} [template]  which artwork to draw on
  * @returns {Promise<HTMLCanvasElement>}
  */
-export async function renderCard({ side, text, name = '', lang = 'en', scale = 1, debug = false }) {
+export async function renderCard({
+  side,
+  text,
+  name = '',
+  lang = 'en',
+  scale = 1,
+  debug = false,
+  template = DEFAULT_TEMPLATE,
+}) {
   await ensureFonts();
-  const art = CARD_ART[side];
+  const art = CARD_ART[template][side];
   const img = await loadImage(art.src);
 
   const canvas = document.createElement('canvas');
@@ -143,9 +160,16 @@ export async function renderCard({ side, text, name = '', lang = 'en', scale = 1
 
   ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
 
+  // Some sides are artwork and nothing else — the reply card's back is left
+  // blank on purpose, as room for a sticker or a drawing.
+  if (ARTWORK_ONLY[template]?.includes(side)) return canvas;
+
   const style = TYPE[lang] || TYPE.en;
   const rtl = lang === 'ar';
-  const box = resolveBox(side, scale);
+  const box = resolveBox(template, side, scale);
+  // Scale type with the artwork's own resolution, so 2x artwork doesn't get
+  // half-size text.
+  const unit = (art.width / REFERENCE_WIDTH) * scale;
 
   ctx.direction = rtl ? 'rtl' : 'ltr';
   ctx.textAlign = 'center';
@@ -156,7 +180,7 @@ export async function renderCard({ side, text, name = '', lang = 'en', scale = 1
   const nameGap = name ? 0.55 : 0;
   const bodyBox = { ...box, height: box.height * (name ? 0.78 : 1) };
 
-  const { size, lines } = fitText(ctx, text, bodyBox, style, scale);
+  const { size, lines } = fitText(ctx, text, bodyBox, style, unit);
   ctx.font = `${style.weight} ${size}px ${style.family}, system-ui, sans-serif`;
 
   const lineStep = size * style.lineHeight;
@@ -181,8 +205,8 @@ export async function renderCard({ side, text, name = '', lang = 'en', scale = 1
   if (debug) {
     ctx.save();
     ctx.strokeStyle = 'magenta';
-    ctx.lineWidth = 2 * scale;
-    ctx.setLineDash([8 * scale, 6 * scale]);
+    ctx.lineWidth = 2 * unit;
+    ctx.setLineDash([8 * unit, 6 * unit]);
     ctx.strokeRect(box.x, box.y, box.width, box.height);
     ctx.restore();
   }

@@ -284,7 +284,8 @@ h1 {
   margin-bottom: 0.35rem;
 }
 .field input,
-.field select {
+.field select,
+.field textarea {
   font: inherit;
   font-weight: 600;
   width: 100%;
@@ -295,11 +296,31 @@ h1 {
   background: var(--white);
   color: var(--ink);
 }
+.field textarea {
+  line-height: 1.5;
+  resize: vertical;
+  display: block;
+}
+:root[dir='rtl'] .field textarea,
+:root[dir='rtl'] .field input {
+  font-family: var(--font-ar);
+}
 .field input:focus,
-.field select:focus {
+.field select:focus,
+.field textarea:focus {
   outline: 2px solid var(--gold);
   outline-offset: 1px;
   border-color: transparent;
+}
+
+/* Character counter under the message box. */
+.field .hint {
+  display: block;
+  margin-top: 0.35rem;
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: var(--ink-soft);
+  text-align: end;
 }
 
 .error {
@@ -429,4 +450,40 @@ footer {
   .actions .btn {
     flex: 0 1 auto;
   }
+}
+
+/* --- reply ------------------------------------------------------------ */
+.replyinvite {
+  margin-top: 2rem;
+  padding: 1.25rem 1.4rem;
+  background: var(--white);
+  border: 1.5px dashed var(--line);
+  border-radius: var(--radius);
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.9rem;
+}
+.replyinvite p {
+  margin: 0;
+  font-weight: 700;
+}
+.replyinvite .btn {
+  flex: 0 1 auto;
+}
+
+/* The honeypot. Bots fill in every field they can find; people never see it.
+   Kept out of the layout and off the accessibility tree, but NOT display:none —
+   some bots skip hidden fields, which would defeat the point. */
+.hp {
+  position: absolute;
+  left: -9999px;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+}
+
+#reply-count {
+  font-variant-numeric: tabular-nums;
 }

@@ -18,25 +18,52 @@ export const SITE = {
 };
 
 /**
- * The card artwork. Each side keeps its own native size — they are not the
- * same aspect ratio, and squashing them to match would distort the logos.
+ * The card artwork, by template.
+ *
+ *   giu   — the cards Khalid sends. Each side keeps its own native size; they
+ *           are not the same aspect ratio and squashing them would distort the
+ *           logos.
+ *   reply — the card people send back. A different design on purpose, so nobody
+ *           is replying on Khalid's own stationery.
  */
 export const CARD_ART = {
-  front: { src: '/assets/card-front.png', width: 1336, height: 553 },
-  back: { src: '/assets/card-back.png', width: 1336, height: 517 },
+  giu: {
+    front: { src: '/assets/card-front.png', width: 1336, height: 553 },
+    back: { src: '/assets/card-back.png', width: 1336, height: 517 },
+  },
+  reply: {
+    front: { src: '/assets/reply-front.png', width: 2672, height: 1106 },
+    // Rendered as artwork only — never drawn on. It exists so the printed card
+    // has a blank side for a sticker or a drawing.
+    back: { src: '/assets/reply-back.png', width: 2672, height: 1106 },
+  },
 };
 
 /**
  * Where text is allowed to go, as a fraction of each card's width/height.
- * These were measured off the beige brush strokes in the artwork, then inset
- * slightly so no glyph touches a ragged brush edge.
+ * Measured off the empty region in each artwork, then inset slightly so no
+ * glyph touches a ragged edge.
  *
  * To retune: open any card with ?debug=1 — the boxes are drawn in magenta.
  */
 export const CARD_LAYOUT = {
-  front: { x0: 0.424, y0: 0.415, x1: 0.838, y1: 0.865 },
-  back: { x0: 0.466, y0: 0.205, x1: 0.842, y1: 0.752 },
+  giu: {
+    front: { x0: 0.424, y0: 0.415, x1: 0.838, y1: 0.865 },
+    back: { x0: 0.466, y0: 0.205, x1: 0.842, y1: 0.752 },
+  },
+  reply: {
+    // Measured off the empty region in reply-front.png, then inset.
+    // Re-measure with tools/measure-safe-area.mjs when the real artwork lands.
+    front: { x0: 0.108, y0: 0.243, x1: 0.892, y1: 0.739 },
+    back: { x0: 0.1, y0: 0.1, x1: 0.9, y1: 0.9 }, // unused — back is artwork only
+  },
 };
+
+/** Sides that carry no text, whatever is passed in. */
+export const ARTWORK_ONLY = { reply: ['back'] };
+
+/** The default template, so every existing call site keeps working. */
+export const DEFAULT_TEMPLATE = 'giu';
 
 /** Typography. Sizes are in card-pixels at scale 1. */
 export const TYPE = {

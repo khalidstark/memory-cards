@@ -5,6 +5,7 @@
 // see here is exactly what the person will get.
 import { SITE } from './config.js';
 import { renderCard } from './card-render.js';
+import { downloadPdf, withBusy } from './export.js';
 import { pick } from './i18n.js';
 
 const $ = (id) => document.getElementById(id);
@@ -16,7 +17,7 @@ let prevLang = 'en';
 
 /** Must match SCHEMA in tools/admin-server.mjs — the server rejects a mismatch
  *  so a stale browser tab can't overwrite good data with an old format. */
-const SCHEMA = 2;
+const SCHEMA = 3;
 const BASE_KEY = 'giu-admin-base';
 const isAsk = (e) => Boolean(e?.ask);
 const realSlugs = () => Object.keys(people).filter((k) => !k.startsWith('_'));
@@ -69,6 +70,12 @@ function renderList() {
     tag.textContent = empty ? 'empty' : isAsk(entry) ? 'asks' : 'ready';
 
     btn.append(label, tag);
+    if (entry?.reply) {
+      const r = document.createElement('span');
+      r.className = 'tag reply';
+      r.textContent = 'reply';
+      btn.append(r);
+    }
     btn.addEventListener('click', () => select(slug));
     li.append(btn);
     list.append(li);
@@ -96,12 +103,14 @@ function setType(type) {
 function select(slug) {
   current = slug;
   const entry = people[slug];
+  $('replies-view').classList.add('hidden');
   $('empty').classList.add('hidden');
   $('editor').classList.remove('hidden');
 
   $('slug').value = slug;
   setType(isAsk(entry) ? 'ask' : 'ready');
 
+  $('allow-reply').checked = Boolean(entry.reply);
   $('name-en').value = entry.name?.en || '';
   $('name-ar').value = entry.name?.ar || '';
   $('front-en').value = entry.front?.en || '';
@@ -125,6 +134,8 @@ function collect() {
   };
   if (ask) entry.ask = true;
   else entry.name = { en: $('name-en').value.trim(), ar: $('name-ar').value.trim() };
+  // Only written when on, so an off card stays clean in the JSON.
+  if ($('allow-reply').checked) entry.reply = true;
 
   people[current] = entry;
 }
@@ -341,6 +352,92 @@ async function downloadQr() {
   }
 }
 
+// --- replies people sent back -----------------------------------------------
+
+/**
+ * Replies arrive as commits in the memory-cards repo, so they only appear here
+ * after a `git pull`. Nothing in this UI can know about one that hasn't been
+ * pulled — hence the note telling him to pull.
+ */
+async function loadReplies() {
+  try {
+    const { replies } = await fetch('/api/replies', { cache: 'no-cache' }).then((r) => r.json());
+    return replies || [];
+  } catch {
+    return [];
+  }
+}
+
+async function showReplies() {
+  $('editor').classList.add('hidden');
+  $('empty').classList.add('hidden');
+  $('replies-view').classList.remove('hidden');
+
+  const list = $('replies-list');
+  list.replaceChildren();
+  const replies = await loadReplies();
+
+  $('replies-note').textContent = replies.length
+    ? `${replies.length} ${replies.length === 1 ? 'card' : 'cards'} · run "git pull" to fetch any newer ones`
+    : 'Nothing yet. Replies arrive as commits — run "git pull" to fetch them.';
+
+  for (const r of replies) {
+    const item = document.createElement('article');
+    item.className = 'replyitem';
+
+    const head = document.createElement('header');
+    const who = document.createElement('strong');
+    who.textContent = r.fromName || '(no name)';
+    const meta = document.createElement('small');
+    const when = r.receivedAt ? new Date(r.receivedAt).toLocaleString() : '';
+    meta.textContent = `to /${r.toSlug} · ${when}`;
+    head.append(who, meta);
+
+    const frame = document.createElement('div');
+    frame.className = 'cardframe';
+
+    const dl = document.createElement('button');
+    dl.type = 'button';
+    dl.className = 'btn btn-ghost';
+    dl.textContent = 'Download as PDF';
+    dl.addEventListener('click', (e) =>
+      withBusy(e.currentTarget, 'Preparing…', () =>
+        downloadPdf({
+          template: 'reply',
+          name: r.fromName,
+          filename: r.fromName,
+          front: r.message,
+          back: '',
+          lang: r.lang === 'ar' ? 'ar' : 'en',
+        }),
+      ).catch(() => toast('Could not build the PDF', true)),
+    );
+
+    item.append(head, frame, dl);
+    list.append(item);
+
+    renderCard({
+      template: 'reply',
+      side: 'front',
+      text: r.message,
+      name: r.fromName,
+      lang: r.lang === 'ar' ? 'ar' : 'en',
+      scale: 1,
+    }).then((canvas) => frame.append(canvas));
+  }
+}
+
+function hideReplies() {
+  $('replies-view').classList.add('hidden');
+  if (current) $('editor').classList.remove('hidden');
+  else $('empty').classList.remove('hidden');
+}
+
+async function refreshReplyBadge() {
+  const replies = await loadReplies();
+  $('reply-badge').textContent = replies.length ? `(${replies.length})` : '';
+}
+
 // --- wiring -----------------------------------------------------------------
 
 function wire() {
@@ -374,6 +471,15 @@ function wire() {
       preview();
     });
   }
+
+  $('allow-reply').addEventListener('change', () => {
+    collect();
+    markDirty();
+    renderList();
+  });
+
+  $('show-replies').addEventListener('click', showReplies);
+  $('close-replies').addEventListener('click', hideReplies);
 
   $('add-ready').addEventListener('click', addReady);
   $('add-ask').addEventListener('click', addAsk);
@@ -429,6 +535,7 @@ async function main() {
 
   wire();
   renderList();
+  refreshReplyBadge();
   const first = realSlugs()[0];
   if (first) select(first);
 }

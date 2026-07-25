@@ -33,6 +33,7 @@
         <div class="roster-actions">
           <button class="btn btn-ghost" id="add-ready" type="button">+ Ready card</button>
           <button class="btn btn-ghost" id="add-ask" type="button">+ Ask card</button>
+          <button class="btn btn-ghost" id="show-replies" type="button">Replies <span id="reply-badge"></span></button>
         </div>
         <ul id="list"></ul>
         <p class="hint" id="count"></p>
@@ -41,6 +42,16 @@
       <!-- Editor ------------------------------------------------------- -->
       <main class="editor">
         <p class="empty" id="empty">Pick someone on the left, or add a new card.</p>
+
+        <!-- Cards people sent back ---------------------------------------- -->
+        <section id="replies-view" class="hidden">
+          <div class="previewhead">
+            <span class="eyebrow">Cards sent to you</span>
+            <button class="btn btn-ghost" id="close-replies" type="button">Back to cards</button>
+          </div>
+          <p class="hint" id="replies-note"></p>
+          <div id="replies-list"></div>
+        </section>
 
         <form id="editor" class="hidden" autocomplete="off">
           <div class="row">
@@ -71,6 +82,17 @@
               </label>
             </div>
           </div>
+
+          <label class="toggle" id="reply-toggle">
+            <input id="allow-reply" type="checkbox" />
+            <span>
+              <strong>Let them reply with a card</strong>
+              <small
+                >They get a “Reply with a memory card” button. Replies commit to your
+                <code>memory-cards</code> repo — <code>git pull</code> to read them.</small
+              >
+            </span>
+          </label>
 
           <p class="hint namehint hidden" id="askhint">
             This card asks the person for their name when they scan it. Write

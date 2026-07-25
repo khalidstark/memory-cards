@@ -280,3 +280,71 @@ One consequence: if you ever connect this repo to Vercel for automatic
 deploys-on-push, the cards won't be in the repo and the live site would come up
 empty. Deploying with `npm run deploy` from your machine — which is what you do
 now — sends the real file and is unaffected.
+
+
+---
+
+## Replies — letting people send a card back
+
+Tick **"Let them reply with a card"** on any card in the admin. That person then
+sees a *Reply with a memory card* button under their own card: they write their
+name and a message, and it comes to you.
+
+**Where replies go.** A Vercel serverless function (`api/reply.js`) commits each
+one as a JSON file into the private `memory-cards` repo. To read them:
+
+```bash
+git pull
+npm run admin        # then click "Replies"
+```
+
+Each one renders on the reply template and can be downloaded as a PDF. Nothing
+in the admin can know about a reply you haven't pulled — hence the reminder in
+that view. To be emailed when one arrives, set the GitHub repo to
+**Watch → All Activity**.
+
+**Replies are never public.** `replies/` is in `.vercelignore`, so the folder is
+not deployed. Requesting `/replies/<anything>.json` on the live site returns 404.
+If you ever change that file, re-test it: it is the one mistake here that would
+expose everybody's private messages at once.
+
+### One-time setup
+
+The endpoint needs a GitHub token to commit:
+
+1. GitHub → Settings → Developer settings → **Fine-grained personal access
+   token**. Repository access: **only `memory-cards`**. Permissions:
+   **Contents → Read and write**. Nothing else.
+2. Add it to Vercel, along with the repo name:
+
+```bash
+npx vercel env add GITHUB_TOKEN production     # paste the token
+npx vercel env add GITHUB_REPO production      # khalidstark/memory-cards
+npm run deploy
+```
+
+The token never reaches the browser — it is only readable by the serverless
+function. Revoke it in one click if anything looks wrong.
+
+### Limits, stated plainly
+
+There is **no per-IP rate limiting** — that would need a KV store. The endpoint
+does check the request origin, a honeypot field, length caps, and that the card
+actually accepts replies, but a determined person with `curl` could still spam
+commits. Given the URLs are unguessable and the token is revocable, that's an
+accepted trade rather than an oversight.
+
+### The reply artwork
+
+`assets/reply-front.png` and `assets/reply-back.png`, both 2672 x 1106.
+**The current pair are placeholders** — plain shapes in the GIU colours. Replace
+them with the real design, then re-measure where the text may sit:
+
+```bash
+npm i sharp
+node tools/measure-safe-area.mjs assets/reply-front.png
+```
+
+Paste the printed numbers into `CARD_LAYOUT.reply.front` in `js/config.js` and
+check with `?debug=1`. The back is deliberately never drawn on — it stays blank
+for a sticker or a drawing.
