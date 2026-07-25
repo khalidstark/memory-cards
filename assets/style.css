@@ -487,3 +487,93 @@ footer {
 #reply-count {
   font-variant-numeric: tabular-nums;
 }
+
+/* --- sprites ---------------------------------------------------------- */
+/*
+   Each sheet is a 6x6 grid of 36 frames. Two stepped animations walk it:
+   the X one advances a column, the Y one advances a row once per full pass of
+   X. Duration of Y is therefore exactly 6x the duration of X.
+
+   --fw / --fh are one frame's size, printed by tools/build-sprites.py.
+*/
+.sprite {
+  --cols: 6;
+  --rows: 6;
+  --step: 0.09s; /* time per frame */
+  width: var(--fw);
+  height: var(--fh);
+  background-repeat: no-repeat;
+  background-size: calc(var(--fw) * var(--cols)) calc(var(--fh) * var(--rows));
+  background-position: 0 0;
+  flex: none;
+  animation:
+    sprite-x calc(var(--step) * var(--cols)) steps(var(--cols)) infinite,
+    sprite-y calc(var(--step) * var(--cols) * var(--rows)) steps(var(--rows)) infinite;
+}
+
+@keyframes sprite-x {
+  to {
+    background-position-x: calc(var(--fw) * var(--cols) * -1);
+  }
+}
+@keyframes sprite-y {
+  to {
+    background-position-y: calc(var(--fh) * var(--rows) * -1);
+  }
+}
+
+/* The melt plays once and stays a puddle — looping it would have the poor
+   thing reassembling itself forever.
+
+   Only the ROW animation runs once. The column one must keep looping, or it
+   parks at -6 frames, a full sheet past the edge, and the sprite vanishes.
+   `forwards` can't hold the last frame for the same reason — the final
+   keyframe value is deliberately out of range — so js/card.js freezes it on
+   the real last frame when the row animation ends. */
+.sprite-melt {
+  --fw: 211px;
+  --fh: 150px;
+  --step: 0.075s;
+  background-image: url('sprites/melt.webp');
+  animation-iteration-count: infinite, 1;
+  margin: 0 auto 0.25rem;
+}
+.sprite-melt.done {
+  animation: none;
+  background-position: calc(var(--fw) * -5) calc(var(--fh) * -5);
+}
+
+.sprite-download {
+  --fw: 46px;
+  --fh: 50px;
+  background-image: url('sprites/download.webp');
+}
+
+.sprite-writing {
+  --fw: 62px;
+  --fh: 67px;
+  background-image: url('sprites/writing.webp');
+}
+
+/* Motion can be genuinely unpleasant for some people. Hold frame one. */
+@media (prefers-reduced-motion: reduce) {
+  .sprite {
+    animation: none;
+    background-position: 0 0;
+  }
+}
+
+/* The mascot sits above the download button rather than beside it. */
+.withsprite {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0;
+}
+.withsprite .sprite {
+  margin-bottom: -6px;
+}
+
+.replyinvite .sprite-writing {
+  margin-inline-end: 0.2rem;
+}

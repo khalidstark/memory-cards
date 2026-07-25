@@ -319,7 +319,22 @@ function wire() {
   });
 }
 
+/**
+ * The melt sprite plays once and holds its final puddle frame. It can't do that
+ * with animation-fill-mode: the last keyframe is one frame past the sheet edge
+ * (that's what makes the loop wrap seamlessly), so holding it would show
+ * nothing. Freeze it explicitly instead.
+ */
+function freezeMascotWhenDone() {
+  const mascot = $('mascot');
+  if (!mascot) return;
+  mascot.addEventListener('animationend', (e) => {
+    if (e.animationName === 'sprite-y') mascot.classList.add('done');
+  });
+}
+
 async function main() {
+  freezeMascotWhenDone();
   getLang = mountLangToggle($('lang'), repaintAll);
 
   slug = readSlug();

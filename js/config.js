@@ -32,10 +32,10 @@ export const CARD_ART = {
     back: { src: '/assets/card-back.png', width: 1336, height: 517 },
   },
   reply: {
-    front: { src: '/assets/reply-front.png', width: 2672, height: 1106 },
+    front: { src: '/assets/reply-front.png', width: 815, height: 481 },
     // Rendered as artwork only — never drawn on. It exists so the printed card
     // has a blank side for a sticker or a drawing.
-    back: { src: '/assets/reply-back.png', width: 2672, height: 1106 },
+    back: { src: '/assets/reply-back.png', width: 815, height: 361 },
   },
 };
 
@@ -52,9 +52,10 @@ export const CARD_LAYOUT = {
     back: { x0: 0.466, y0: 0.205, x1: 0.842, y1: 0.752 },
   },
   reply: {
-    // Measured off the empty region in reply-front.png, then inset.
-    // Re-measure with tools/measure-safe-area.mjs when the real artwork lands.
-    front: { x0: 0.108, y0: 0.243, x1: 0.892, y1: 0.739 },
+    // Set by eye, not measured: in this artwork the message panel is only a
+    // few RGB points warmer than the card body, so automatic detection picks
+    // up the whole card. Check with ?debug=1 after any artwork change.
+    front: { x0: 0.11, y0: 0.37, x1: 0.71, y1: 0.81 },
     back: { x0: 0.1, y0: 0.1, x1: 0.9, y1: 0.9 }, // unused — back is artwork only
   },
 };

@@ -21,6 +21,10 @@
       </header>
 
       <main>
+        <!-- Seen the moment any QR code is scanned. Decorative, so it is
+             hidden from screen readers rather than described. -->
+        <div class="sprite sprite-melt" id="mascot" aria-hidden="true"></div>
+
         <!-- Ask step: only for slugs marked "ask" in people.json -------- -->
         <section id="step-ask" class="hidden">
           <p class="eyebrow" id="eyebrow-ask">Connects AI — Berlin Workshop</p>
@@ -63,7 +67,10 @@
           </div>
 
           <div class="actions">
-            <button class="btn btn-primary" id="pdf" type="button" data-i18n="downloadPdf">Download PDF</button>
+            <div class="withsprite">
+              <span class="sprite sprite-download" aria-hidden="true"></span>
+              <button class="btn btn-primary" id="pdf" type="button" data-i18n="downloadPdf">Download PDF</button>
+            </div>
             <button class="btn btn-accent" id="save" type="button" data-i18n="savePhoto">Save to Photos</button>
             <button class="btn btn-ghost hidden" id="again" type="button" data-i18n="startOver"></button>
           </div>
@@ -71,6 +78,7 @@
 
           <!-- Only for cards where Khalid enabled replies. -->
           <div class="replyinvite hidden" id="reply-invite">
+            <span class="sprite sprite-writing" aria-hidden="true"></span>
             <p data-i18n="replyInvite"></p>
             <button class="btn btn-accent" id="open-reply" type="button" data-i18n="replyCta"></button>
           </div>
