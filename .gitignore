@@ -8,3 +8,8 @@ node_modules/
 qr/
 
 .DS_Store
+
+# Your actual cards — personal messages, and they shouldn't be rewound by a
+# code rollback. Kept local and deployed straight from your machine.
+# data/people.example.json is the committed template.
+data/people.json

@@ -265,5 +265,18 @@ Commit whenever something works:
 git add -A && git commit -m "what changed"
 ```
 
-Note `data/people.json` **is** tracked, so a reset also rewinds your cards.
-If you only want to rewind code, keep a copy of that file first.
+`data/people.json` is **not** tracked — your cards are yours and a code
+rollback won't touch them. `data/people.example.json` is the committed template
+a fresh clone starts from.
+
+Because it's untracked, git is not backing your cards up. Copy the file
+somewhere safe now and then:
+
+```bash
+cp data/people.json ~/Desktop/cards-backup.json
+```
+
+One consequence: if you ever connect this repo to Vercel for automatic
+deploys-on-push, the cards won't be in the repo and the live site would come up
+empty. Deploying with `npm run deploy` from your machine — which is what you do
+now — sends the real file and is unaffected.
