@@ -348,3 +348,33 @@ node tools/measure-safe-area.mjs assets/reply-front.png
 Paste the printed numbers into `CARD_LAYOUT.reply.front` in `js/config.js` and
 check with `?debug=1`. The back is deliberately never drawn on — it stays blank
 for a sticker or a drawing.
+
+
+## Stickers
+
+The person replying picks one, and it lands inside the frame on the back of
+their card. Everything else about the back stays as it was — blank paper for a
+real sticker or a drawing.
+
+```bash
+python3 tools/build-stickers.py
+```
+
+Reads `~/Downloads/stickers, designs,photos`, cuts the backgrounds out, and
+writes `assets/stickers/*.webp` plus the `data/stickers.json` manifest the
+picker reads. Add or remove files in that folder and re-run.
+
+Most sources are JPEGs with no transparency, so the tool floods inward from the
+edges to clear only background that touches the border — a global colour match
+would punch holes through white eyes and highlights inside the art. Anything
+still nearly opaque afterwards is listed at the end so it can be checked by eye;
+photographic cut-outs will always have slightly rough edges.
+
+The endpoint checks a submitted sticker id against the manifest before storing
+it, so nothing arbitrary can be echoed back into a card.
+
+**On the artwork itself:** roughly half of these are other people's
+intellectual property — Disney and Marvel characters, photographs of real
+people, licensed stock. That was raised before they were added and included at
+Khalid's direction. Worth remembering if the site is ever attached more
+formally to the university's name.

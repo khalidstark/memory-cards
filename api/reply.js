@@ -44,6 +44,15 @@ function originAllowed(req) {
   }
 }
 
+async function fetchJson(req, path) {
+  const proto = (req.headers['x-forwarded-proto'] || 'https').split(',')[0];
+  const res = await fetch(`${proto}://${req.headers.host}${path}`, {
+    headers: { 'cache-control': 'no-cache' },
+  });
+  if (!res.ok) throw new Error(`${path} unavailable (${res.status})`);
+  return res.json();
+}
+
 /** The roster is public anyway; reading it over HTTP avoids bundling surprises. */
 async function loadPeople(req) {
   const proto = (req.headers['x-forwarded-proto'] || 'https').split(',')[0];
@@ -106,6 +115,7 @@ export default async function handler(req, res) {
   const fromName = clean(body.fromName, MAX_NAME);
   const message = clean(body.message, MAX_MESSAGE);
   const lang = body.lang === 'ar' ? 'ar' : 'en';
+  const sticker = clean(body.sticker, 60);
 
   if (!/^[a-z0-9][a-z0-9-]*$/.test(toSlug)) return json(res, 400, { error: 'Bad card' });
   if (!fromName) return json(res, 400, { error: 'Name is required' });
@@ -132,6 +142,18 @@ export default async function handler(req, res) {
   if (!entry || toSlug.startsWith('_')) return json(res, 404, { error: 'No such card' });
   if (!entry.reply) return json(res, 403, { error: 'This card is not accepting replies' });
 
+  // A sticker id is echoed straight back into the card, so it has to be one we
+  // actually ship — not an arbitrary string that could point anywhere.
+  let stickerId = '';
+  if (sticker) {
+    try {
+      const { stickers } = await fetchJson(req, '/data/stickers.json');
+      if ((stickers || []).some((s) => s.id === sticker)) stickerId = sticker;
+    } catch {
+      // Losing the sticker is a far smaller loss than losing the message.
+    }
+  }
+
   const now = new Date();
   const suffix = Math.random().toString(36).slice(2, 6);
   const path = `replies/${stamp(now)}-${toSlug}-${suffix}.json`;
@@ -139,7 +161,7 @@ export default async function handler(req, res) {
   try {
     await commitToGitHub(
       path,
-      { toSlug, fromName, message, lang, receivedAt: now.toISOString() },
+      { toSlug, fromName, message, lang, sticker: stickerId, receivedAt: now.toISOString() },
       `Reply from ${fromName} on /${toSlug}`,
     );
   } catch (err) {

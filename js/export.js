@@ -53,7 +53,7 @@ async function renderBothSides(card, scale = EXPORT_SCALE) {
   const template = card.template || DEFAULT_TEMPLATE;
   return Promise.all([
     renderCard({ side: 'front', text: card.front, name: '', lang, scale, template }),
-    renderCard({ side: 'back', text: card.back, name: card.name, lang, scale, template }),
+    renderCard({ side: 'back', text: card.back, name: card.name, lang, scale, template, sticker: card.sticker || '' }),
   ]);
 }
 

@@ -133,7 +133,14 @@ function showAsk() {
 // --- replying with a card of their own --------------------------------------
 
 let slug = '';
-let sentReply = null; // { fromName, message } once it's been accepted
+let sentReply = null; // { fromName, message, sticker } once it's been accepted
+let stickers = []; // from data/stickers.json
+let chosenSticker = ''; // sticker id, '' means none
+
+const stickerUrl = (id) => {
+  const s = stickers.find((x) => x.id === id);
+  return s ? `/assets/stickers/${s.file}` : '';
+};
 
 /** The reply card as it currently reads, for preview and for the PDF. */
 function replyCard() {
@@ -141,22 +148,25 @@ function replyCard() {
   const draft = sentReply || {
     fromName: cleanName($('reply-name').value),
     message: $('reply-message').value.trim(),
+    sticker: chosenSticker,
   };
   return {
     template: 'reply',
     name: draft.fromName,
     filename: draft.fromName || 'my-card',
     front: draft.message,
-    back: '', // artwork only — left blank for a sticker or a drawing
+    back: '', // artwork only — the sticker is the only thing that goes there
+    sticker: stickerUrl(draft.sticker),
     lang,
   };
 }
 
 let replyToken = 0;
-async function paintReplyPreview(frameId = 'reply-frame-front') {
+async function paintReplyPreview(frontId = 'reply-frame-front', backId = 'reply-frame-back') {
   const token = ++replyToken;
   const card = replyCard();
-  const canvas = await renderCard({
+
+  const front = await renderCard({
     template: 'reply',
     side: 'front',
     text: card.front || ' ',
@@ -166,9 +176,23 @@ async function paintReplyPreview(frameId = 'reply-frame-front') {
     debug: isDebug(),
   });
   if (token !== replyToken) return; // a newer keystroke already won
-  const frame = $(frameId);
-  frame.querySelector('canvas, .skeleton')?.remove();
-  frame.append(canvas);
+  const ff = $(frontId);
+  ff.querySelector('canvas, .skeleton')?.remove();
+  ff.append(front);
+
+  const backFrame = backId && $(backId);
+  if (!backFrame) return;
+  const back = await renderCard({
+    template: 'reply',
+    side: 'back',
+    text: '',
+    lang: card.lang,
+    scale: 1,
+    sticker: card.sticker,
+  });
+  if (token !== replyToken) return;
+  backFrame.querySelector('canvas, .skeleton')?.remove();
+  backFrame.append(back);
 }
 
 /** Preview on every keystroke would re-render mid-word; wait for a pause. */
@@ -201,12 +225,7 @@ async function showThanks() {
   $('step-reply').classList.add('hidden');
   $('step-thanks').classList.remove('hidden');
   window.scrollTo({ top: 0, behavior: 'smooth' });
-  await paintReplyPreview('thanks-frame-front');
-  // The back carries no text — it's the blank side they draw on.
-  const back = await renderCard({ template: 'reply', side: 'back', text: '', lang: getLang(), scale: 1 });
-  const frame = $('thanks-frame-back');
-  frame.querySelector('canvas, .skeleton')?.remove();
-  frame.append(back);
+  await paintReplyPreview('thanks-frame-front', 'thanks-frame-back');
 }
 
 async function sendReply(e) {
@@ -242,6 +261,7 @@ async function sendReply(e) {
         fromName,
         message,
         lang: getLang(),
+        sticker: chosenSticker,
         website: $('reply-hp').value, // honeypot — must stay empty
       }),
     });
@@ -255,7 +275,7 @@ async function sendReply(e) {
     }
 
     // Only now is it safe to stop treating the form as the source of truth.
-    sentReply = { fromName, message };
+    sentReply = { fromName, message, sticker: chosenSticker };
     await showThanks();
   } catch (netErr) {
     // Never clear the form on failure — retyping a heartfelt message because
@@ -267,7 +287,59 @@ async function sendReply(e) {
   }
 }
 
+/**
+ * The picker is a radiogroup rather than a <select>: 32 thumbnails are far
+ * easier to choose from by sight than by name, especially on a phone.
+ */
+async function buildStickerPicker() {
+  const box = $('sticker-picker');
+  try {
+    const data = await fetch('/data/stickers.json', { cache: 'no-cache' }).then((r) => r.json());
+    stickers = data.stickers || [];
+  } catch {
+    stickers = [];
+  }
+  if (!stickers.length) {
+    box.closest('.field')?.classList.add('hidden');
+    return;
+  }
+
+  const choose = (id, el) => {
+    chosenSticker = id;
+    for (const b of box.querySelectorAll('.stickerbtn')) {
+      b.setAttribute('aria-checked', String(b === el));
+    }
+    paintReplyPreview();
+  };
+
+  const none = document.createElement('button');
+  none.type = 'button';
+  none.className = 'stickerbtn none';
+  none.setAttribute('role', 'radio');
+  none.setAttribute('aria-checked', 'true');
+  none.dataset.i18n = 'noSticker';
+  none.addEventListener('click', () => choose('', none));
+  box.append(none);
+
+  for (const s of stickers) {
+    const btn = document.createElement('button');
+    btn.type = 'button';
+    btn.className = 'stickerbtn';
+    btn.setAttribute('role', 'radio');
+    btn.setAttribute('aria-checked', 'false');
+    const img = document.createElement('img');
+    img.src = `/assets/stickers/${s.file}`;
+    img.alt = s.id.replace(/-/g, ' ');
+    img.loading = 'lazy'; // 32 thumbnails shouldn't block the form
+    btn.append(img);
+    btn.addEventListener('click', () => choose(s.id, btn));
+    box.append(btn);
+  }
+  applyLang(getLang());
+}
+
 function wireReply() {
+  buildStickerPicker();
   $('open-reply').addEventListener('click', showReplyForm);
   $('reply-cancel').addEventListener('click', showCardAgain);
   $('back-to-card').addEventListener('click', showCardAgain);

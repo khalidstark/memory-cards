@@ -395,6 +395,8 @@ async function showReplies() {
 
     const frame = document.createElement('div');
     frame.className = 'cardframe';
+    const backFrame = document.createElement('div');
+    backFrame.className = 'cardframe';
 
     const dl = document.createElement('button');
     dl.type = 'button';
@@ -408,22 +410,27 @@ async function showReplies() {
           filename: r.fromName,
           front: r.message,
           back: '',
+          sticker: r.sticker ? `/assets/stickers/${r.sticker}.webp` : '',
           lang: r.lang === 'ar' ? 'ar' : 'en',
         }),
       ).catch(() => toast('Could not build the PDF', true)),
     );
 
-    item.append(head, frame, dl);
+    item.append(head, frame, backFrame, dl);
     list.append(item);
 
+    const lang = r.lang === 'ar' ? 'ar' : 'en';
+    renderCard({ template: 'reply', side: 'front', text: r.message, name: r.fromName, lang, scale: 1 })
+      .then((canvas) => frame.append(canvas));
+    // Show the back too — it carries whichever sticker they chose.
     renderCard({
       template: 'reply',
-      side: 'front',
-      text: r.message,
-      name: r.fromName,
-      lang: r.lang === 'ar' ? 'ar' : 'en',
+      side: 'back',
+      text: '',
+      lang,
       scale: 1,
-    }).then((canvas) => frame.append(canvas));
+      sticker: r.sticker ? `/assets/stickers/${r.sticker}.webp` : '',
+    }).then((canvas) => backFrame.append(canvas));
   }
 }
 

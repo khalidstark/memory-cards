@@ -577,3 +577,48 @@ footer {
 .replyinvite .sprite-writing {
   margin-inline-end: 0.2rem;
 }
+
+/* --- sticker picker --------------------------------------------------- */
+.stickers {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(64px, 1fr));
+  gap: 0.5rem;
+  max-height: 15rem;
+  overflow-y: auto;
+  padding: 0.6rem;
+  border: 1.5px solid var(--line);
+  border-radius: 10px;
+  background: var(--white);
+  -webkit-overflow-scrolling: touch;
+}
+
+.stickerbtn {
+  aspect-ratio: 1;
+  display: grid;
+  place-items: center;
+  padding: 0.3rem;
+  border: 2px solid transparent;
+  border-radius: 10px;
+  background: var(--paper);
+  cursor: pointer;
+}
+.stickerbtn img {
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
+  pointer-events: none;
+}
+.stickerbtn:hover {
+  background: var(--beige);
+}
+.stickerbtn[aria-checked='true'] {
+  border-color: var(--red);
+  background: var(--beige);
+}
+.stickerbtn.none {
+  font-size: 0.7rem;
+  font-weight: 700;
+  color: var(--ink-soft);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}

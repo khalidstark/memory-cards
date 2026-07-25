@@ -109,6 +109,12 @@
               <small class="hint"><span id="reply-count">0</span>/500</small>
             </label>
 
+            <div class="field">
+              <span data-i18n="pickSticker"></span>
+              <div class="stickers" id="sticker-picker" role="radiogroup"></div>
+              <small class="hint" data-i18n="stickerHint"></small>
+            </div>
+
             <!-- Honeypot: hidden from people, irresistible to bots. -->
             <div class="hp" aria-hidden="true">
               <label>Website<input id="reply-hp" type="text" tabindex="-1" autocomplete="off" /></label>
@@ -125,6 +131,10 @@
           <div class="cards">
             <div class="cardframe" id="reply-frame-front">
               <span class="sidetag" data-i18n="front">Front</span>
+              <div class="skeleton"></div>
+            </div>
+            <div class="cardframe" id="reply-frame-back">
+              <span class="sidetag" data-i18n="back">Back</span>
               <div class="skeleton"></div>
             </div>
           </div>

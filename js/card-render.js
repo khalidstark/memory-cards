@@ -5,7 +5,15 @@
 // shapes Arabic correctly, the same pixels end up in the PNG and the PDF, and
 // there is no html2canvas font-loading race to lose.
 // ---------------------------------------------------------------------------
-import { ARTWORK_ONLY, CARD_ART, CARD_LAYOUT, DEFAULT_TEMPLATE, TYPE } from './config.js';
+import {
+  ARTWORK_ONLY,
+  CARD_ART,
+  CARD_LAYOUT,
+  DEFAULT_TEMPLATE,
+  STICKER_AREA,
+  STICKER_FILL,
+  TYPE,
+} from './config.js';
 
 const imageCache = new Map();
 
@@ -138,6 +146,7 @@ function resolveBox(template, side, scale) {
  * @param {number} scale    1 for preview, EXPORT_SCALE for download
  * @param {boolean} debug   draw the safe-zone box
  * @param {'giu'|'reply'} [template]  which artwork to draw on
+ * @param {string} [sticker]  URL of a sticker to place, where the side allows one
  * @returns {Promise<HTMLCanvasElement>}
  */
 export async function renderCard({
@@ -148,6 +157,7 @@ export async function renderCard({
   scale = 1,
   debug = false,
   template = DEFAULT_TEMPLATE,
+  sticker = '',
 }) {
   await ensureFonts();
   const art = CARD_ART[template][side];
@@ -161,8 +171,28 @@ export async function renderCard({
   ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
 
   // Some sides are artwork and nothing else — the reply card's back is left
-  // blank on purpose, as room for a sticker or a drawing.
-  if (ARTWORK_ONLY[template]?.includes(side)) return canvas;
+  // blank on purpose, as room for a sticker or a drawing. A sticker chosen on
+  // the page is the one thing that may go there.
+  if (ARTWORK_ONLY[template]?.includes(side)) {
+    const area = STICKER_AREA[template]?.[side];
+    if (sticker && area) {
+      try {
+        const img = await loadImage(sticker);
+        const bx = area.x0 * canvas.width;
+        const by = area.y0 * canvas.height;
+        const bw = (area.x1 - area.x0) * canvas.width;
+        const bh = (area.y1 - area.y0) * canvas.height;
+        // Contain, never crop or stretch — a squashed sticker looks broken.
+        const k = Math.min(bw / img.width, bh / img.height) * STICKER_FILL;
+        const w = img.width * k;
+        const h = img.height * k;
+        ctx.drawImage(img, bx + (bw - w) / 2, by + (bh - h) / 2, w, h);
+      } catch {
+        // A missing sticker shouldn't cost them the rest of the card.
+      }
+    }
+    return canvas;
+  }
 
   const style = TYPE[lang] || TYPE.en;
   const rtl = lang === 'ar';

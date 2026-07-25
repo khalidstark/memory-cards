@@ -37,6 +37,9 @@ export const STRINGS = {
     replyBody:
       'Say whatever you want. It comes straight to me, and nobody else sees it. Afterwards you can print your card — the back is left blank for a sticker or a drawing.',
     replyMessage: 'Your message',
+    pickSticker: 'Pick a sticker',
+    stickerHint: 'Goes on the back of your card. Skip it and the back stays blank to draw on.',
+    noSticker: 'None',
     replySend: 'Send it',
     replyCancel: 'Not now',
     replyPreview: 'How yours will look',
@@ -85,6 +88,9 @@ export const STRINGS = {
     replyBody:
       'اكتب اللي إنت عايزه. هيوصلّي أنا بس، محدش تاني هيشوفه. وبعدين تقدر تطبع الكارت — الضهر سايبه فاضي لملصق أو رسمة.',
     replyMessage: 'رسالتك',
+    pickSticker: 'اختار ملصق',
+    stickerHint: 'هيتحط على ضهر الكارت. سيبه من غير ملصق والضهر هيفضل فاضي علشان ترسم فيه.',
+    noSticker: 'بدون',
     replySend: 'ابعت',
     replyCancel: 'مش دلوقتي',
     replyPreview: 'شكل الكارت بتاعك',
