@@ -85,6 +85,7 @@ function validate(people) {
     if (!entry.front || !entry.back) return `"${slug}" needs front and back text`;
     if (entry.workshops) return `"${slug}" uses the old "workshops" format — reload the admin page (⌘R)`;
     if ('reply' in entry && typeof entry.reply !== 'boolean') return `"${slug}" has a bad reply flag`;
+    if (entry.decoration && typeof entry.decoration !== 'object') return `"${slug}" has a bad decoration`;
   }
   return null;
 }
@@ -95,7 +96,7 @@ function validate(people) {
  * JavaScript from before a change, and saving would write the old format over
  * good data. That happened once — hence this check.
  */
-const SCHEMA = 3;
+const SCHEMA = 4;
 
 async function handleApi(req, res, url) {
   if (url.pathname === '/api/health') return json(res, 200, { ok: true, schema: SCHEMA });
@@ -169,6 +170,38 @@ async function handleApi(req, res, url) {
     }
     replies.sort((a, b) => String(b.receivedAt).localeCompare(String(a.receivedAt)));
     return json(res, 200, { replies });
+  }
+
+  // Decoration layers for Khalid's own cards. Written as ordinary assets so
+  // they deploy with the site; people.json only stores the filename.
+  if (url.pathname === '/api/decoration' && req.method === 'PUT') {
+    let body;
+    try {
+      body = JSON.parse(await readBody(req, 2_000_000));
+    } catch (e) {
+      return json(res, 400, { error: `Could not read the image: ${e.message}` });
+    }
+    const { slug, side, png } = body;
+    if (!SLUG_RE.test(String(slug || '')) || !['front', 'back'].includes(side)) {
+      return json(res, 400, { error: 'bad slug or side' });
+    }
+    const dir = join(ROOT, 'assets/decorations');
+    const { mkdir, unlink } = await import('node:fs/promises');
+    await mkdir(dir, { recursive: true });
+    const name = `${slug}-${side}.png`;
+
+    if (!png) {
+      // Clearing a side removes the file rather than leaving a stale one behind.
+      await unlink(join(dir, name)).catch(() => {});
+      return json(res, 200, { ok: true, file: null });
+    }
+    const prefix = 'data:image/png;base64,';
+    if (typeof png !== 'string' || !png.startsWith(prefix)) {
+      return json(res, 400, { error: 'expected a PNG data URL' });
+    }
+    await writeFile(join(dir, name), Buffer.from(png.slice(prefix.length), 'base64'));
+    console.log(`saved assets/decorations/${name}`);
+    return json(res, 200, { ok: true, file: name });
   }
 
   if (url.pathname === '/api/qr' && req.method === 'GET') {

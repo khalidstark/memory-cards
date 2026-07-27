@@ -506,9 +506,12 @@ footer {
   background-size: calc(var(--fw) * var(--cols)) calc(var(--fh) * var(--rows));
   background-position: 0 0;
   flex: none;
+  /* steps() must be a literal integer: WebKit rejects steps(var(--cols)) and
+     drops the whole shorthand, which killed every sprite on iOS. --cols is
+     still fine inside calc(). */
   animation:
-    sprite-x calc(var(--step) * var(--cols)) steps(var(--cols)) infinite,
-    sprite-y calc(var(--step) * var(--cols) * var(--rows)) steps(var(--rows)) infinite;
+    sprite-x calc(var(--step) * var(--cols)) steps(6) infinite,
+    sprite-y calc(var(--step) * var(--cols) * var(--rows)) steps(6) infinite;
 }
 
 @keyframes sprite-x {
@@ -621,4 +624,136 @@ footer {
   color: var(--ink-soft);
   text-transform: uppercase;
   letter-spacing: 0.06em;
+}
+
+/* --- decorator --------------------------------------------------------- */
+.decorator {
+  margin-bottom: 1.25rem;
+}
+
+.dec-tabs {
+  display: inline-flex;
+  border: 1.5px solid var(--line);
+  border-radius: 999px;
+  overflow: hidden;
+  margin-bottom: 0.7rem;
+}
+.dec-tab {
+  font: inherit;
+  font-size: 0.85rem;
+  font-weight: 700;
+  padding: 0.5rem 1.1rem;
+  min-height: 42px;
+  border: 0;
+  background: transparent;
+  color: var(--ink-soft);
+  cursor: pointer;
+}
+.dec-tab[aria-pressed='true'] {
+  background: var(--ink);
+  color: var(--paper);
+}
+
+.dec-stage {
+  position: relative;
+  border-radius: var(--radius);
+  overflow: hidden;
+  box-shadow: var(--shadow);
+  background: var(--white);
+}
+.dec-card,
+.dec-layer {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+.dec-layer {
+  position: absolute;
+  inset: 0;
+  /* Without this, dragging a sticker scrolls the page on a phone instead. */
+  touch-action: none;
+}
+
+.dec-tools,
+.dec-swatches,
+.dec-widths,
+.dec-acts {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.45rem;
+  margin-top: 0.7rem;
+}
+
+.dec-tool {
+  font: inherit;
+  font-size: 0.85rem;
+  font-weight: 700;
+  padding: 0.5rem 1rem;
+  min-height: 44px;
+  border: 1.5px solid var(--line);
+  border-radius: 999px;
+  background: var(--white);
+  color: var(--ink);
+  cursor: pointer;
+}
+.dec-tool[aria-pressed='true'] {
+  background: var(--ink);
+  border-color: var(--ink);
+  color: var(--paper);
+}
+
+.dec-swatch {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  border: 2px solid var(--line);
+  cursor: pointer;
+  padding: 0;
+}
+.dec-swatch[aria-pressed='true'] {
+  outline: 3px solid var(--ink);
+  outline-offset: 2px;
+}
+
+.dec-width {
+  width: 44px;
+  height: 40px;
+  display: grid;
+  place-items: center;
+  border: 1.5px solid var(--line);
+  border-radius: 10px;
+  background: var(--white);
+  cursor: pointer;
+}
+.dec-width span {
+  display: block;
+  border-radius: 50%;
+  background: var(--ink);
+}
+.dec-width[aria-pressed='true'] {
+  border-color: var(--ink);
+  background: var(--beige);
+}
+
+.dec-acts .dec-act {
+  flex: 0 1 auto;
+  padding: 0.5rem 1rem;
+  min-height: 44px;
+  font-size: 0.85rem;
+}
+
+.dec-traylabel {
+  margin: 1rem 0 0.4rem;
+}
+.dec-tray {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(60px, 1fr));
+  gap: 0.5rem;
+  max-height: 12rem;
+  overflow-y: auto;
+  padding: 0.6rem;
+  border: 1.5px solid var(--line);
+  border-radius: 10px;
+  background: var(--white);
+  -webkit-overflow-scrolling: touch;
 }

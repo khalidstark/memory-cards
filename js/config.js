@@ -63,17 +63,6 @@ export const CARD_LAYOUT = {
 /** Sides that carry no text, whatever is passed in. */
 export const ARTWORK_ONLY = { reply: ['back'] };
 
-/**
- * Where a chosen sticker lands. Inside the hand-drawn frame on the reply back,
- * so the printed card still has room around it for a real sticker or a drawing.
- * Fractions of the card, like CARD_LAYOUT.
- */
-export const STICKER_AREA = {
-  reply: { back: { x0: 0.45, y0: 0.17, x1: 0.9, y1: 0.75 } },
-};
-
-/** Fraction of the sticker area a sticker may fill. Leaves breathing room. */
-export const STICKER_FILL = 0.82;
 
 /** The default template, so every existing call site keeps working. */
 export const DEFAULT_TEMPLATE = 'giu';
@@ -95,3 +84,10 @@ export const EXPORT_SCALE = 3;
 
 /** Max characters accepted from the self-serve name field. */
 export const MAX_NAME_LENGTH = 32;
+
+/**
+ * Decoration layers are flattened at this multiple of the card's own pixel
+ * size. Flattening the on-screen preview and scaling it up for print would be
+ * visibly soft; 1.5x keeps it sharp without a huge payload.
+ */
+export const DECORATION_SCALE = 1.5;

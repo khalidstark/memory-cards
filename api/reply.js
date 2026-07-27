@@ -10,9 +10,15 @@
 // nothing here can end up publicly readable.
 // ---------------------------------------------------------------------------
 
-const MAX_BODY_BYTES = 4096;
+// Raised from 4 KB to carry two flattened decoration layers. This is the
+// biggest widening of the endpoint's surface, so each layer is validated
+// individually below rather than trusting the overall cap.
+const MAX_BODY_BYTES = 1_100_000;
+const MAX_LAYER_BYTES = 400_000;
 const MAX_NAME = 40;
 const MAX_MESSAGE = 500;
+const PNG_PREFIX = 'data:image/png;base64,';
+const PNG_MAGIC = Buffer.from([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a]);
 
 const json = (res, code, body) => res.status(code).json(body);
 
@@ -42,6 +48,29 @@ function originAllowed(req) {
   } catch {
     return false;
   }
+}
+
+/**
+ * A decoration layer must be a real PNG, not merely a string claiming to be
+ * one. Checking the magic bytes after decoding is what stops someone posting
+ * arbitrary content that we'd then commit into the repo.
+ *
+ * @returns {Buffer|null|false}  buffer when valid, null when absent, false when bad
+ */
+function decodeLayer(value) {
+  if (value == null || value === '') return null;
+  if (typeof value !== 'string' || !value.startsWith(PNG_PREFIX)) return false;
+  const b64 = value.slice(PNG_PREFIX.length);
+  if (b64.length > MAX_LAYER_BYTES * 1.4) return false; // base64 is ~4/3 of raw
+  let buf;
+  try {
+    buf = Buffer.from(b64, 'base64');
+  } catch {
+    return false;
+  }
+  if (!buf.length || buf.length > MAX_LAYER_BYTES) return false;
+  if (!buf.subarray(0, 8).equals(PNG_MAGIC)) return false;
+  return buf;
 }
 
 async function fetchJson(req, path) {
@@ -87,7 +116,10 @@ async function commitToGitHub(path, contents, message) {
     },
     body: JSON.stringify({
       message,
-      content: Buffer.from(JSON.stringify(contents, null, 2) + '\n', 'utf8').toString('base64'),
+      // Buffers go through as-is (a PNG); anything else is written as JSON.
+      content: Buffer.isBuffer(contents)
+        ? contents.toString('base64')
+        : Buffer.from(JSON.stringify(contents, null, 2) + '\n', 'utf8').toString('base64'),
       branch,
     }),
   });
@@ -115,7 +147,14 @@ export default async function handler(req, res) {
   const fromName = clean(body.fromName, MAX_NAME);
   const message = clean(body.message, MAX_MESSAGE);
   const lang = body.lang === 'ar' ? 'ar' : 'en';
-  const sticker = clean(body.sticker, 60);
+
+  const layers = {};
+  for (const side of ['front', 'back']) {
+    const key = side === 'front' ? 'decorationFront' : 'decorationBack';
+    const decoded = decodeLayer(body[key]);
+    if (decoded === false) return json(res, 400, { error: `That decoration didn't look like an image` });
+    if (decoded) layers[side] = decoded;
+  }
 
   if (!/^[a-z0-9][a-z0-9-]*$/.test(toSlug)) return json(res, 400, { error: 'Bad card' });
   if (!fromName) return json(res, 400, { error: 'Name is required' });
@@ -142,26 +181,22 @@ export default async function handler(req, res) {
   if (!entry || toSlug.startsWith('_')) return json(res, 404, { error: 'No such card' });
   if (!entry.reply) return json(res, 403, { error: 'This card is not accepting replies' });
 
-  // A sticker id is echoed straight back into the card, so it has to be one we
-  // actually ship — not an arbitrary string that could point anywhere.
-  let stickerId = '';
-  if (sticker) {
-    try {
-      const { stickers } = await fetchJson(req, '/data/stickers.json');
-      if ((stickers || []).some((s) => s.id === sticker)) stickerId = sticker;
-    } catch {
-      // Losing the sticker is a far smaller loss than losing the message.
-    }
-  }
-
   const now = new Date();
   const suffix = Math.random().toString(36).slice(2, 6);
-  const path = `replies/${stamp(now)}-${toSlug}-${suffix}.json`;
+  const stem = `${stamp(now)}-${toSlug}-${suffix}`;
+  const decoration = {};
 
   try {
+    // Layers commit first. If the run dies half way, an orphaned PNG is a much
+    // smaller problem than a reply pointing at a file that never arrived.
+    for (const [side, buf] of Object.entries(layers)) {
+      const file = `${stem}-${side}.png`;
+      await commitToGitHub(`replies/${file}`, buf, `Decoration (${side}) from ${fromName}`);
+      decoration[side] = file;
+    }
     await commitToGitHub(
-      path,
-      { toSlug, fromName, message, lang, sticker: stickerId, receivedAt: now.toISOString() },
+      `replies/${stem}.json`,
+      { toSlug, fromName, message, lang, decoration, receivedAt: now.toISOString() },
       `Reply from ${fromName} on /${toSlug}`,
     );
   } catch (err) {

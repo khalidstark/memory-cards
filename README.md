@@ -350,11 +350,27 @@ check with `?debug=1`. The back is deliberately never drawn on — it stays blan
 for a sticker or a drawing.
 
 
-## Stickers
+## Decorating a card
 
-The person replying picks one, and it lands inside the frame on the back of
-their card. Everything else about the back stays as it was — blank paper for a
-real sticker or a drawing.
+Both you (in the admin, "Decorate this card") and anyone replying get the same
+editor: add as many stickers as you like to either side, drag them, resize and
+rotate them with the corner handle, and draw over the top — colours, three brush
+widths, an eraser and undo.
+
+Only the *flattened* result is stored, so a decoration can't be taken apart and
+re-edited later. Reopening a card shows the existing artwork as a locked layer
+with new work going on top; "Clear this side" starts over.
+
+### Caching — the one that bit us
+
+`vercel.json` deliberately does **not** put `immutable` on `/assets/`, only on
+`/assets/fonts/`. An earlier version cached every asset for a year as immutable,
+which meant phones that had visited once kept a stale `style.css` and never saw
+any later change — invisible sprites, an unstyled sticker grid, and a honeypot
+field showing in the form. If you ever add `immutable` back, only do it for
+files whose name changes when their content does.
+
+## Stickers
 
 ```bash
 python3 tools/build-stickers.py
@@ -362,7 +378,7 @@ python3 tools/build-stickers.py
 
 Reads `~/Downloads/stickers, designs,photos`, cuts the backgrounds out, and
 writes `assets/stickers/*.webp` plus the `data/stickers.json` manifest the
-picker reads. Add or remove files in that folder and re-run.
+editor's tray reads. Add or remove files in that folder and re-run.
 
 Most sources are JPEGs with no transparency, so the tool floods inward from the
 edges to clear only background that touches the border — a global colour match

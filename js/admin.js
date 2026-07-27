@@ -3,21 +3,26 @@
 //
 // The preview calls the same renderCard() the real card page uses, so what you
 // see here is exactly what the person will get.
-import { SITE } from './config.js';
+import { SITE, DECORATION_SCALE } from './config.js';
 import { renderCard } from './card-render.js';
 import { downloadPdf, withBusy } from './export.js';
 import { pick } from './i18n.js';
+import { createDecorator } from './decorator.js';
 
 const $ = (id) => document.getElementById(id);
 
 let people = {}; // the whole file, including any _readme key
 let current = null; // slug being edited
+let decorator = null; // sticker + drawing editor, shared with the reply page
+let stickerList = [];
+/** Bumped on every save so the browser refetches a decoration it just changed. */
+let decoVersion = Date.now();
 let dirty = false;
 let prevLang = 'en';
 
 /** Must match SCHEMA in tools/admin-server.mjs — the server rejects a mismatch
  *  so a stale browser tab can't overwrite good data with an old format. */
-const SCHEMA = 3;
+const SCHEMA = 4;
 const BASE_KEY = 'giu-admin-base';
 const isAsk = (e) => Boolean(e?.ask);
 const realSlugs = () => Object.keys(people).filter((k) => !k.startsWith('_'));
@@ -136,6 +141,10 @@ function collect() {
   else entry.name = { en: $('name-en').value.trim(), ar: $('name-ar').value.trim() };
   // Only written when on, so an off card stays clean in the JSON.
   if ($('allow-reply').checked) entry.reply = true;
+  // Decoration filenames are owned by the save routine, not the form — carry
+  // whatever is already there so editing text can't drop the artwork.
+  const prev = people[current];
+  if (prev?.decoration) entry.decoration = prev.decoration;
 
   people[current] = entry;
 }
@@ -177,6 +186,7 @@ async function preview() {
     { i: 1, side: 'back', text: back || ' ', name: signature },
   ];
 
+  const deco = people[current]?.decoration || {};
   for (const job of jobs) {
     const canvas = await renderCard({
       side: job.side,
@@ -184,6 +194,7 @@ async function preview() {
       name: job.name,
       lang,
       scale: 1,
+      decoration: deco[job.side] ? `/assets/decorations/${deco[job.side]}?t=${decoVersion}` : null,
     });
     if (token !== previewToken) return; // a newer keystroke already won
     const frame = frames[job.i];
@@ -201,6 +212,68 @@ function debounce(fn, ms = 260) {
   };
 }
 const previewSoon = debounce(preview);
+
+async function buildAdminDecorator() {
+  if (decorator) return;
+  try {
+    const data = await fetch('/data/stickers.json', { cache: 'no-cache' }).then((r) => r.json());
+    stickerList = data.stickers || [];
+  } catch {
+    stickerList = [];
+  }
+  decorator = createDecorator({
+    mount: $('admin-decorator'),
+    stickers: stickerList,
+    renderSide: async (side, scale) => {
+      const { front, back } = previewText();
+      return renderCard({
+        side,
+        text: side === 'front' ? front || ' ' : back || ' ',
+        name: side === 'front' ? '' : pick(SITE.author, prevLang),
+        lang: prevLang,
+        scale,
+      });
+    },
+    labels: () => ({
+      front: 'Front',
+      back: 'Back',
+      toolMove: 'Move',
+      toolDraw: 'Draw',
+      toolErase: 'Erase',
+      undo: 'Undo',
+      clearSide: 'Clear this side',
+      trayLabel: 'Tap a sticker to add it',
+    }),
+    onChange: markDirty,
+  });
+  await decorator.refresh();
+  // Existing decoration comes back as a locked base layer: only the flattened
+  // image is stored, so earlier stickers can't be picked up and moved again.
+  const deco = people[current]?.decoration || {};
+  for (const side of ['front', 'back']) {
+    if (deco[side]) await decorator.setBase(side, `/assets/decorations/${deco[side]}?t=${decoVersion}`);
+  }
+}
+
+/** Writes both sides' layers, and records the filenames on the entry. */
+async function saveDecoration(slug) {
+  if (!decorator) return;
+  const entry = people[slug];
+  if (!entry) return;
+  const deco = {};
+  for (const side of ['front', 'back']) {
+    const canvas = decorator.hasContent(side) ? await decorator.flatten(side, DECORATION_SCALE) : null;
+    const res = await fetch('/api/decoration', {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ slug, side, png: canvas ? canvas.toDataURL('image/png') : null }),
+    }).then((r) => r.json());
+    if (res.file) deco[side] = res.file;
+  }
+  decoVersion = Date.now();
+  if (Object.keys(deco).length) entry.decoration = deco;
+  else delete entry.decoration;
+}
 
 // --- adding / removing ------------------------------------------------------
 
@@ -274,6 +347,7 @@ async function saveAll() {
   btn.disabled = true;
   btn.textContent = 'Saving…';
   try {
+    if (current) await saveDecoration(current);
     const res = await fetch(`/api/people?schema=${SCHEMA}`, {
       method: 'PUT',
       headers: { 'Content-Type': 'application/json' },
@@ -410,7 +484,8 @@ async function showReplies() {
           filename: r.fromName,
           front: r.message,
           back: '',
-          sticker: r.sticker ? `/assets/stickers/${r.sticker}.webp` : '',
+          decorationFront: r.decoration?.front ? `/replies/${r.decoration.front}` : null,
+          decorationBack: r.decoration?.back ? `/replies/${r.decoration.back}` : null,
           lang: r.lang === 'ar' ? 'ar' : 'en',
         }),
       ).catch(() => toast('Could not build the PDF', true)),
@@ -420,16 +495,25 @@ async function showReplies() {
     list.append(item);
 
     const lang = r.lang === 'ar' ? 'ar' : 'en';
-    renderCard({ template: 'reply', side: 'front', text: r.message, name: r.fromName, lang, scale: 1 })
-      .then((canvas) => frame.append(canvas));
-    // Show the back too — it carries whichever sticker they chose.
+    // Decoration layers live next to the reply JSON in replies/.
+    const layer = (side) => (r.decoration?.[side] ? `/replies/${r.decoration[side]}` : null);
+
+    renderCard({
+      template: 'reply',
+      side: 'front',
+      text: r.message,
+      name: r.fromName,
+      lang,
+      scale: 1,
+      decoration: layer('front'),
+    }).then((canvas) => frame.append(canvas));
     renderCard({
       template: 'reply',
       side: 'back',
       text: '',
       lang,
       scale: 1,
-      sticker: r.sticker ? `/assets/stickers/${r.sticker}.webp` : '',
+      decoration: layer('back'),
     }).then((canvas) => backFrame.append(canvas));
   }
 }
@@ -483,6 +567,14 @@ function wire() {
     collect();
     markDirty();
     renderList();
+  });
+
+  $('toggle-dec').addEventListener('click', async () => {
+    const panel = $('admin-decorator');
+    const opening = panel.classList.contains('hidden');
+    panel.classList.toggle('hidden', !opening);
+    $('toggle-dec').textContent = opening ? 'Hide decorator' : 'Decorate this card';
+    if (opening) await buildAdminDecorator();
   });
 
   $('show-replies').addEventListener('click', showReplies);
