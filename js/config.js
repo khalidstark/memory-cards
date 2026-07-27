@@ -3,7 +3,7 @@
 // ---------------------------------------------------------------------------
 
 /** Your LinkedIn profile. Shown on every page. */
-export const LINKEDIN_URL = 'https://www.linkedin.com/in/YOUR-PROFILE-HERE';
+export const LINKEDIN_URL = 'https://www.linkedin.com/in/khaliiiiiiiiiid';
 
 export const SITE = {
   /**

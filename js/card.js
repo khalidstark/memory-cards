@@ -13,6 +13,7 @@ import { renderCard, isDebug } from './card-render.js';
 import { downloadPdf, saveToPhone, isIOS, withBusy } from './export.js';
 import { STRINGS, mountLangToggle, applyLang, pick } from './i18n.js';
 import { createDecorator } from './decorator.js';
+import { paintPoem } from './poem.js';
 
 const $ = (id) => document.getElementById(id);
 
@@ -445,11 +446,13 @@ async function main() {
   if (isAsk()) {
     $('step-ask').classList.remove('hidden');
     $('name').focus();
+    paintPoem(); // shown once they reach their card, not on the name form
     return;
   }
 
   $('found').classList.remove('hidden');
   await paintCard();
+  paintPoem();
 }
 
 main();

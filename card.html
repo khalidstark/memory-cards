@@ -76,6 +76,13 @@
           </div>
           <p class="error" id="err"></p>
 
+          <!-- Everyone arrives here by QR code, so this is the only page most
+               people will ever see. The poem belongs where it's read. -->
+          <section class="poem hidden" id="poem" dir="rtl" lang="ar">
+            <blockquote id="poem-lines"></blockquote>
+            <cite id="poem-author"></cite>
+          </section>
+
           <!-- Only for cards where Khalid enabled replies. -->
           <div class="replyinvite hidden" id="reply-invite">
             <span class="sprite sprite-writing" aria-hidden="true"></span>

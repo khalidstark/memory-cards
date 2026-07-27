@@ -5,7 +5,7 @@ export const STRINGS = {
   en: {
     dir: 'ltr',
     langName: 'العربية',
-    tagline: 'A small thank-you from the Connects AI Berlin workshop.',
+    tagline: 'From Khalid — for your memory box, your wallet, or even your bag.',
     intro:
       'Before I left Berlin I made a card for the people I met here. Each one is opened by its own QR code — if I gave you one, scan it and yours will be waiting.',
     sampleLabel: 'What a card looks like',
@@ -63,7 +63,7 @@ export const STRINGS = {
   ar: {
     dir: 'rtl',
     langName: 'English',
-    tagline: 'كلمة شكر صغيرة من ورشة كونيكتس إيه آي في برلين.',
+    tagline: 'من خالد — لصندوق ذكرياتك، أو محفظتك، أو حتى شنطتك.',
     intro:
       'قبل ما أسيب برلين عملت كارت للناس اللي قابلتهم هنا. كل كارت بيتفتح بكود QR خاص بيه — لو إديتك واحد، امسحه وهتلاقي الكارت بتاعك مستنيك.',
     sampleLabel: 'الكارت شكله إيه',
