@@ -91,14 +91,15 @@
           <p class="lede" data-i18n="replyBody"></p>
 
           <form class="panel" id="reply-form" novalidate>
-            <label class="field">
+            <p class="replyas hidden" id="reply-as"></p>
+
+            <label class="field hidden" id="reply-name-field">
               <span data-i18n="yourName"></span>
               <input
                 id="reply-name"
                 type="text"
                 autocomplete="name"
                 maxlength="40"
-                required
                 data-i18n-placeholder="namePlaceholder"
               />
             </label>

@@ -79,6 +79,11 @@ async function renderBothSides(card, scale = EXPORT_SCALE) {
  * artwork's real aspect ratio.
  */
 export async function downloadPdf(card) {
+  // A page that forgets the vendor script fails here with "cannot destructure",
+  // which says nothing useful. Name the actual problem.
+  if (!window.jspdf?.jsPDF) {
+    throw new Error('PDF library not loaded — this page is missing vendor/jspdf.umd.min.js');
+  }
   const { jsPDF } = window.jspdf;
   const [front, back] = await renderBothSides(card);
 

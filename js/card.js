@@ -62,8 +62,18 @@ function currentCard() {
     filename: who,
     front: fill(pick(person.front, lang), who),
     back: fill(pick(person.back, lang), who),
+    // Whatever Khalid drew on this card in the admin, so the page, the PDF and
+    // the saved image all show the same thing.
+    decorationFront: decorationUrl('front'),
+    decorationBack: decorationUrl('back'),
     lang,
   };
+}
+
+/** Decoration layers are ordinary site assets, named in the people.json entry. */
+function decorationUrl(sideName) {
+  const file = person?.decoration?.[sideName];
+  return file ? `/assets/decorations/${file}` : null;
 }
 
 async function paintCard() {
@@ -77,8 +87,8 @@ async function paintCard() {
 
   const debug = isDebug();
   const jobs = [
-    { frame: 'frame-front', side: 'front', text: card.front, tag: t.front, name: '' },
-    { frame: 'frame-back', side: 'back', text: card.back, tag: t.back, name: card.name },
+    { frame: 'frame-front', side: 'front', text: card.front, tag: t.front, name: '', deco: card.decorationFront },
+    { frame: 'frame-back', side: 'back', text: card.back, tag: t.back, name: card.name, deco: card.decorationBack },
   ];
 
   for (const job of jobs) {
@@ -89,6 +99,7 @@ async function paintCard() {
       lang,
       scale: 1,
       debug,
+      decoration: job.deco,
     });
     canvas.setAttribute('role', 'img');
     canvas.setAttribute('aria-label', `${job.tag}: ${job.text}`);
@@ -138,11 +149,24 @@ let sentReply = null; // { fromName, message, sticker } once it's been accepted
 let decorator = null; // the sticker + drawing editor, built lazily
 let sentLayers = null; // { front, back } data URLs once the reply is accepted
 
+/**
+ * Who is sending the reply. We already know: on an ask card they typed their
+ * name to open it, and a ready card is addressed to one named person. Only
+ * fall back to asking when a card somehow has neither.
+ */
+function senderName() {
+  const known = isAsk() ? answer : pick(person?.name, getLang());
+  return cleanName(known || '') || cleanName($('reply-name').value);
+}
+
+/** True when we had to fall back to asking. */
+const mustAskName = () => !cleanName(isAsk() ? answer || '' : pick(person?.name, getLang()) || '');
+
 /** The reply card as it currently reads, for preview and for the PDF. */
 function replyCard() {
   const lang = getLang();
   const draft = sentReply || {
-    fromName: cleanName($('reply-name').value),
+    fromName: senderName(),
     message: $('reply-message').value.trim(),
   };
   return {
@@ -195,7 +219,15 @@ function showReplyForm() {
   $('step-thanks').classList.add('hidden');
   $('step-reply').classList.remove('hidden');
   window.scrollTo({ top: 0, behavior: 'smooth' });
-  $('reply-name').focus();
+
+  // Don't ask for a name we already have — just show whose card it will be.
+  const ask = mustAskName();
+  $('reply-name-field').classList.toggle('hidden', !ask);
+  const badge = $('reply-as');
+  badge.classList.toggle('hidden', ask);
+  if (!ask) badge.textContent = `${STRINGS[getLang()].replyingAs} ${senderName()}`;
+
+  (ask ? $('reply-name') : $('reply-message')).focus();
   paintReplyPreview();
 }
 
@@ -234,7 +266,7 @@ async function sendReply(e) {
   e.preventDefault();
   const t = STRINGS[getLang()];
   const err = $('reply-err');
-  const fromName = cleanName($('reply-name').value);
+  const fromName = senderName();
   const message = $('reply-message').value.trim();
 
   if (!fromName) {
@@ -372,22 +404,7 @@ function wire() {
   });
 }
 
-/**
- * The melt sprite plays once and holds its final puddle frame. It can't do that
- * with animation-fill-mode: the last keyframe is one frame past the sheet edge
- * (that's what makes the loop wrap seamlessly), so holding it would show
- * nothing. Freeze it explicitly instead.
- */
-function freezeMascotWhenDone() {
-  const mascot = $('mascot');
-  if (!mascot) return;
-  mascot.addEventListener('animationend', (e) => {
-    if (e.animationName === 'sprite-y') mascot.classList.add('done');
-  });
-}
-
 async function main() {
-  freezeMascotWhenDone();
   getLang = mountLangToggle($('lang'), repaintAll);
 
   slug = readSlug();

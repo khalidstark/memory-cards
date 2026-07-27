@@ -488,7 +488,7 @@ async function showReplies() {
           decorationBack: r.decoration?.back ? `/replies/${r.decoration.back}` : null,
           lang: r.lang === 'ar' ? 'ar' : 'en',
         }),
-      ).catch(() => toast('Could not build the PDF', true)),
+      ).catch((err) => toast(err.message || 'Could not build the PDF', true)),
     );
 
     item.append(head, frame, backFrame, dl);

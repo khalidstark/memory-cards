@@ -525,25 +525,16 @@ footer {
   }
 }
 
-/* The melt plays once and stays a puddle — looping it would have the poor
-   thing reassembling itself forever.
-
-   Only the ROW animation runs once. The column one must keep looping, or it
-   parks at -6 frames, a full sheet past the edge, and the sprite vanishes.
-   `forwards` can't hold the last frame for the same reason — the final
-   keyframe value is deliberately out of range — so js/card.js freezes it on
-   the real last frame when the row animation ends. */
+/* Loops: the droplet melts into a puddle, reforms, and melts again. Both axes
+   inherit `infinite` from .sprite — an iteration count of 1 on the column
+   animation would park it a full sheet past the edge and the sprite would
+   vanish, which is exactly what happened the first time. */
 .sprite-melt {
   --fw: 211px;
   --fh: 150px;
   --step: 0.075s;
   background-image: url('sprites/melt.webp');
-  animation-iteration-count: infinite, 1;
   margin: 0 auto 0.25rem;
-}
-.sprite-melt.done {
-  animation: none;
-  background-position: calc(var(--fw) * -5) calc(var(--fh) * -5);
 }
 
 .sprite-download {
@@ -756,4 +747,15 @@ footer {
   border-radius: 10px;
   background: var(--white);
   -webkit-overflow-scrolling: touch;
+}
+
+/* Who the reply will be signed by — shown instead of asking for a name we
+   already know. */
+.replyas {
+  margin: 0 0 1.1rem;
+  padding: 0.7rem 0.9rem;
+  background: var(--beige);
+  border-radius: 10px;
+  font-weight: 700;
+  font-size: 0.92rem;
 }

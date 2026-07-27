@@ -36,6 +36,7 @@ export const STRINGS = {
     replyTitle: 'Write me one back',
     replyBody:
       'Say whatever you want. It comes straight to me, and nobody else sees it. Afterwards you can print your card — the back is left blank for a sticker or a drawing.',
+    replyingAs: 'Signed',
     replyMessage: 'Your message',
     decorateLabel: 'Make it yours',
     decorateHint:
@@ -93,6 +94,7 @@ export const STRINGS = {
     replyTitle: 'اكتبلي إنت كمان',
     replyBody:
       'اكتب اللي إنت عايزه. هيوصلّي أنا بس، محدش تاني هيشوفه. وبعدين تقدر تطبع الكارت — الضهر سايبه فاضي لملصق أو رسمة.',
+    replyingAs: 'باسم',
     replyMessage: 'رسالتك',
     decorateLabel: 'زوّقه على مزاجك',
     decorateHint:
