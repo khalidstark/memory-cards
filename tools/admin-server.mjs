@@ -14,6 +14,7 @@
  * no admin page and no write endpoint at all.
  */
 import { createServer } from 'node:http';
+import { createHash } from 'node:crypto';
 import { readFile, writeFile } from 'node:fs/promises';
 import { existsSync } from 'node:fs';
 import { extname, join, normalize, resolve, dirname } from 'node:path';
@@ -98,8 +99,29 @@ function validate(people) {
  */
 const SCHEMA = 4;
 
+/**
+ * A short fingerprint of people.json as it is on disk right now. The admin page
+ * sends back the one it loaded; if they differ, the file changed underneath it
+ * and saving would overwrite whatever changed. This has bitten twice — a tab
+ * left open across an edit happily wrote its stale roster back over it.
+ */
+async function peopleVersion() {
+  try {
+    return createHash('sha1').update(await readFile(PEOPLE)).digest('hex').slice(0, 12);
+  } catch {
+    return 'none';
+  }
+}
+
 async function handleApi(req, res, url) {
   if (url.pathname === '/api/health') return json(res, 200, { ok: true, schema: SCHEMA });
+
+  // The admin loads the roster through here rather than /data/people.json, so
+  // it gets the version stamp along with it.
+  if (url.pathname === '/api/people' && req.method === 'GET') {
+    const people = JSON.parse(await readFile(PEOPLE, 'utf8'));
+    return json(res, 200, { people, version: await peopleVersion() });
+  }
 
   // Is this slug actually published yet? Saving is not the same as deploying,
   // and a QR code for an undeployed card scans to "not assigned yet".
@@ -127,12 +149,23 @@ async function handleApi(req, res, url) {
         error: 'This admin page is out of date — reload it (⌘R) before saving, or it will overwrite your cards with the old format.',
       });
     }
-    let incoming;
+    let payload;
     try {
-      incoming = JSON.parse(await readBody(req));
+      payload = JSON.parse(await readBody(req));
     } catch (e) {
       return json(res, 400, { error: `Could not read the data: ${e.message}` });
     }
+
+    const incoming = payload.people;
+    const current = await peopleVersion();
+    if (payload.baseVersion !== current) {
+      return json(res, 409, {
+        error:
+          'The cards changed on disk since this page loaded — saving now would undo that. Reload (⌘R) and make your edit again.',
+        stale: true,
+      });
+    }
+
     const problem = validate(incoming);
     if (problem) return json(res, 400, { error: problem });
 
@@ -148,7 +181,7 @@ async function handleApi(req, res, url) {
     } catch {}
     const count = Object.keys(incoming).filter((k) => !k.startsWith('_')).length;
     console.log(`saved data/people.json — ${count} ${count === 1 ? 'card' : 'cards'}`);
-    return json(res, 200, { ok: true, count });
+    return json(res, 200, { ok: true, count, version: await peopleVersion() });
   }
 
   // Replies people sent back, as pulled into the repo by `git pull`.

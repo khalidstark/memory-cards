@@ -17,6 +17,8 @@ let decorator = null; // sticker + drawing editor, shared with the reply page
 let stickerList = [];
 /** Bumped on every save so the browser refetches a decoration it just changed. */
 let decoVersion = Date.now();
+/** Fingerprint of people.json as it was when this page loaded it. */
+let baseVersion = null;
 let dirty = false;
 let prevLang = 'en';
 
@@ -351,10 +353,20 @@ async function saveAll() {
     const res = await fetch(`/api/people?schema=${SCHEMA}`, {
       method: 'PUT',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(people),
+      body: JSON.stringify({ people, baseVersion }),
     });
     const out = await res.json();
-    if (!res.ok) throw new Error(out.error || 'save failed');
+    if (!res.ok) {
+      if (out.stale) {
+        // Nothing was written. Say so loudly — a quiet failure here is how the
+        // roster got silently restored twice.
+        setStatus('out of date', 'bad');
+        alert(out.error);
+        return;
+      }
+      throw new Error(out.error || 'save failed');
+    }
+    baseVersion = out.version;
     dirty = false;
     setStatus('saved', 'ok');
     toast(`Saved — ${out.count} ${out.count === 1 ? 'card' : 'cards'}`);
@@ -630,7 +642,11 @@ async function main() {
     return;
   }
 
-  people = await fetch('/data/people.json', { cache: 'no-cache' }).then((r) => r.json());
+  // Through /api/people, not /data/people.json, so we get the version stamp
+  // that stops this tab overwriting an edit made after it loaded.
+  const loaded = await fetch('/api/people', { cache: 'no-cache' }).then((r) => r.json());
+  people = loaded.people;
+  baseVersion = loaded.version;
 
   wire();
   renderList();
