@@ -45,7 +45,8 @@ function cleanName(raw) {
 }
 
 function fill(template, name) {
-  return String(template).replaceAll('{{name}}', name);
+  // A replacer function keeps "$&" or "$1" in a typed name from being expanded.
+  return String(template).replaceAll('{{name}}', () => name);
 }
 
 /** The message and signature for whatever this page is currently showing. */
