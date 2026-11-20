@@ -67,13 +67,22 @@ const KEY = 'giu-card-lang';
 export function getLang() {
   const fromUrl = new URLSearchParams(location.search).get('lang');
   if (fromUrl === 'en' || fromUrl === 'ar') return fromUrl;
-  const stored = localStorage.getItem(KEY);
+  let stored = null;
+  try {
+    stored = localStorage.getItem(KEY);
+  } catch {
+    // Storage can be blocked (private mode, strict cookie settings).
+  }
   if (stored === 'en' || stored === 'ar') return stored;
   return navigator.language?.startsWith('ar') ? 'ar' : 'en';
 }
 
 export function setLang(lang) {
-  localStorage.setItem(KEY, lang);
+  try {
+    localStorage.setItem(KEY, lang);
+  } catch {
+    // Not remembering the choice is fine; the page still switches language.
+  }
   applyLang(lang);
 }
 
