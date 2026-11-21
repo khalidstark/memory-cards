@@ -425,7 +425,15 @@ async function main() {
     return;
   }
 
-  people = await fetch('/data/people.json', { cache: 'no-cache' }).then((r) => r.json());
+  try {
+    const res = await fetch('/data/people.json', { cache: 'no-cache' });
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    people = await res.json();
+  } catch (err) {
+    setStatus('no data', 'bad');
+    toast(`Could not load data/people.json (${err.message}). Copy data/people.example.json to start.`, true);
+    return;
+  }
 
   wire();
   renderList();
