@@ -14,7 +14,7 @@
  * no admin page and no write endpoint at all.
  */
 import { createServer } from 'node:http';
-import { readFile, writeFile } from 'node:fs/promises';
+import { readFile, rename, writeFile } from 'node:fs/promises';
 import { existsSync } from 'node:fs';
 import { extname, join, normalize, resolve, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -139,11 +139,7 @@ async function handleApi(req, res, url) {
     const tmp = `${PEOPLE}.tmp`;
     const text = `${JSON.stringify(incoming, null, 2)}\n`;
     await writeFile(tmp, text, 'utf8');
-    await writeFile(PEOPLE, text, 'utf8');
-    try {
-      const { unlink } = await import('node:fs/promises');
-      await unlink(tmp);
-    } catch {}
+    await rename(tmp, PEOPLE);
     const count = Object.keys(incoming).filter((k) => !k.startsWith('_')).length;
     console.log(`saved data/people.json — ${count} ${count === 1 ? 'card' : 'cards'}`);
     return json(res, 200, { ok: true, count });
