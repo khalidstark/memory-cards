@@ -53,8 +53,8 @@ The key (`besho`, `team`) becomes the URL — `yoursite.com/besho`. Lowercase
 letters, numbers and dashes only. Delete the `sample-person` entry and the
 `_readme` key when you're done.
 
-> Reserved keys you can't use as a slug: `index`, `assets`, `js`, `data`,
-> `vendor`, `qr`.
+> Reserved keys you can't use as a slug: `index`, `admin`, `assets`, `js`,
+> `data`, `vendor`, `qr`, `api`, `card`.
 
 **3. The poem** on the landing page lives in `data/poem.json`. Each entry in
 `verses` is one بيت — `[صدر, عجز]` — set side by side on a wide screen and
