@@ -30,7 +30,17 @@ try {
   process.exit(1);
 }
 
-const people = JSON.parse(readFileSync(resolve(ROOT, 'data/people.json'), 'utf8'));
+let people;
+try {
+  people = JSON.parse(readFileSync(resolve(ROOT, 'data/people.json'), 'utf8'));
+} catch (err) {
+  console.error(
+    err.code === 'ENOENT'
+      ? 'data/people.json not found. Copy data/people.example.json to data/people.json first.'
+      : `Could not read data/people.json: ${err.message}`,
+  );
+  process.exit(1);
+}
 const slugs = Object.keys(people).filter((k) => !k.startsWith('_'));
 
 if (!slugs.length) {
