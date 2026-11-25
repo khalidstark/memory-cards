@@ -5,8 +5,8 @@
  *
  * The crop boxes below were derived by scanning the source for non-white
  * regions, so they hug each card exactly. If you ever re-export the artwork
- * from Canva/ChatGPT, re-run the detection block at the bottom of this file
- * before trusting these numbers.
+ * from Canva/ChatGPT, re-measure the crop boxes (scan the new image for
+ * non-white regions) and update CROPS before trusting these numbers.
  *
  *   node tools/slice-art.mjs "/path/to/source.png"
  *
