@@ -23,7 +23,13 @@ const $ = (id) => document.getElementById(id);
 function readSlug() {
   const q = new URLSearchParams(location.search).get('p');
   if (q) return q.toLowerCase();
-  const path = decodeURIComponent(location.pathname).replace(/^\/+|\/+$/g, '');
+  let path = location.pathname;
+  try {
+    path = decodeURIComponent(path);
+  } catch {
+    // A malformed escape like "%E0%A4" would otherwise throw and leave a blank page.
+  }
+  path = path.replace(/^\/+|\/+$/g, '');
   if (!path || /\.html?$/i.test(path)) return '';
   return path.split('/').pop().toLowerCase();
 }
