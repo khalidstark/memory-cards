@@ -216,12 +216,19 @@ HTML-to-image tools unreliable on phones.
 ```
 index.html      the landing page (intro, poem, sample card)
 card.html       every QR code lands here — ready cards and ask cards alike
+admin.html      the local-only admin page (npm run admin)
 js/card-render.js   the canvas engine
+js/card.js          the card page logic (ready cards and ask cards)
+js/home.js          the landing page logic
+js/admin.js         the admin page logic
 js/export.js        PDF + save-to-phone
+js/i18n.js          English/Arabic UI strings and the language toggle
 js/config.js        LinkedIn URL, titles, text safe zones
 data/people.json    who gets a card (one entry per QR code)
 data/poem.json      the Arabic verse on the landing page
+tools/admin-server.mjs  local server behind the admin page
 tools/make-qrs.mjs  QR codes + printable sheet
+tools/slice-art.mjs one-time artwork slicer
 ```
 
 ---
