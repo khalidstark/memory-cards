@@ -170,6 +170,7 @@ async function main() {
   let people = {};
   try {
     const res = await fetch('/data/people.json', { cache: 'no-cache' });
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
     people = await res.json();
   } catch {
     $('err').textContent = STRINGS[getLang()].loadError;
